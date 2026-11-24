@@ -1,10 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import '../dialogs/board_pinout_sheet.dart';
+import '../dialogs/board_selection_dialog.dart';
+import '../dialogs/pin_configuration_dialog.dart';
 import '../providers/bluetooth_provider.dart';
 import '../theme/app_colors.dart';
 import '../widgets/char_sender_card.dart';
 import '../widgets/led_control_card.dart';
 import '../widgets/pwm_control_card.dart';
+import '../widgets/sensors_dac_card.dart';
 import '../widgets/status_badge.dart';
 import '../widgets/text_sender_card.dart';
 import '../widgets/voice_control_card.dart';
@@ -136,6 +140,84 @@ class ControllerDashboardScreen extends StatelessWidget {
                   ),
                 ),
 
+              // Board Selector & Pinout Quick Bar
+              Container(
+                margin: const EdgeInsets.only(bottom: 16),
+                padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+                decoration: BoxDecoration(
+                  color: AppColors.cardBackground,
+                  borderRadius: BorderRadius.circular(14),
+                  border: Border.all(color: AppColors.border, width: 1),
+                ),
+                child: Row(
+                  children: [
+                    Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                      decoration: BoxDecoration(
+                        color: AppColors.lightOrange,
+                        borderRadius: BorderRadius.circular(6),
+                      ),
+                      child: Text(
+                        bt.selectedBoard.badgeText,
+                        style: const TextStyle(
+                          fontSize: 11,
+                          fontWeight: FontWeight.w800,
+                          color: AppColors.primaryOrange,
+                        ),
+                      ),
+                    ),
+                    const SizedBox(width: 10),
+                    Expanded(
+                      child: InkWell(
+                        onTap: () => BoardSelectionDialog.show(context),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Row(
+                              children: [
+                                Flexible(
+                                  child: Text(
+                                    bt.selectedBoard.name,
+                                    style: const TextStyle(
+                                      fontSize: 13,
+                                      fontWeight: FontWeight.w700,
+                                      color: AppColors.primaryText,
+                                    ),
+                                    overflow: TextOverflow.ellipsis,
+                                  ),
+                                ),
+                                const Icon(Icons.arrow_drop_down,
+                                    size: 18, color: AppColors.primaryOrange),
+                              ],
+                            ),
+                            Text(
+                              'LED: GPIO ${bt.builtinLedPin} • ${bt.selectedBoard.hasDac ? "2x DAC • " : ""}${bt.selectedBoard.hasTouch ? "${bt.selectedBoard.touchPins.length} Touch • " : ""}${bt.selectedBoard.pwmPins.length} PWM',
+                              style: const TextStyle(
+                                fontSize: 10,
+                                color: AppColors.secondaryText,
+                              ),
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                    IconButton(
+                      icon: const Icon(Icons.tune_rounded, size: 19),
+                      tooltip: 'Configure Pins',
+                      color: AppColors.primaryOrange,
+                      onPressed: () => PinConfigurationDialog.show(context),
+                    ),
+                    IconButton(
+                      icon: const Icon(Icons.info_outline_rounded, size: 19),
+                      tooltip: 'Board Pinout & Specs',
+                      color: AppColors.secondaryText,
+                      onPressed: () => BoardPinoutSheet.show(context),
+                    ),
+                  ],
+                ),
+              ),
+
               // 1. LED Control Card
               LedControlCard(
                 isConnected: bt.isConnected,
@@ -143,6 +225,9 @@ class ControllerDashboardScreen extends StatelessWidget {
                 onToggleBuiltin: (val) => bt.setBuiltinLed(val),
                 channelStates: bt.channelStates,
                 onToggleChannel: (ch) => bt.toggleChannel(ch),
+                builtinLedPin: bt.builtinLedPin,
+                boardName: bt.selectedBoard.shortName,
+                onConfigurePins: () => PinConfigurationDialog.show(context),
               ),
 
               const SizedBox(height: 16),
@@ -160,7 +245,14 @@ class ControllerDashboardScreen extends StatelessWidget {
 
               const SizedBox(height: 16),
 
-              // 3. Voice Command Controller Card
+              // 3. DAC, ADC & Touch Sensors Card (ESP32 / ESP32-S3 / Arduino)
+              SensorsDacCard(
+                isConnected: bt.isConnected,
+              ),
+
+              const SizedBox(height: 16),
+
+              // 4. Voice Command Controller Card
               VoiceControlCard(
                 isConnected: bt.isConnected,
                 isListening: bt.isListeningVoice,

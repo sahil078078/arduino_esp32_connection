@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'package:flutter/foundation.dart';
+import '../models/board_model.dart';
 import '../models/bluetooth_device_model.dart';
 import '../models/bluetooth_message.dart';
 import '../services/bluetooth_service.dart';
@@ -15,10 +16,30 @@ class BluetoothProvider extends ChangeNotifier {
   BluetoothProvider({BluetoothService? bluetoothService, bool autoScan = false})
       : _bluetoothService = bluetoothService ?? DefaultBluetoothService() {
     _initStreams();
+    _initChannelStates();
     if (autoScan) {
       scanDevices();
     }
   }
+
+  // Microcontroller Board & Pin Configurations
+  MicrocontrollerBoard _selectedBoard = MicrocontrollerBoard.esp32DevKitV1;
+  MicrocontrollerBoard get selectedBoard => _selectedBoard;
+
+  late BoardPinConfig _pinConfig = BoardPinConfig.fromBoard(_selectedBoard);
+  BoardPinConfig get pinConfig => _pinConfig;
+
+  int get builtinLedPin => _pinConfig.builtinLedPin;
+  int get relay1Pin => _pinConfig.relay1Pin;
+  int get relay2Pin => _pinConfig.relay2Pin;
+  int get relay3Pin => _pinConfig.relay3Pin;
+  int get relay4Pin => _pinConfig.relay4Pin;
+
+  List<int> get pwmAvailablePins => _selectedBoard.pwmPins;
+  List<int> get availableAdcPins => _selectedBoard.adcPins;
+  List<int> get availableDacPins => _selectedBoard.dacPins;
+  List<int> get availableTouchPins => _selectedBoard.touchPins;
+  List<int> get availableGpioPins => _selectedBoard.availableGpioPins;
 
   // Device & Connection State
   List<BluetoothDeviceModel> _discoveredDevices = [];
@@ -36,22 +57,31 @@ class BluetoothProvider extends ChangeNotifier {
   bool _isBuiltinLedOn = false;
   bool get isBuiltinLedOn => _isBuiltinLedOn;
 
-  final Map<String, bool> _channelStates = {
-    'LED 1 (D12)': false,
-    'LED 2 (D11)': false,
-    'LED 3 (D10)': false,
-    'Relay 1 (D7)': false,
-  };
+  final Map<String, bool> _channelStates = {};
   Map<String, bool> get channelStates => Map.unmodifiable(_channelStates);
 
+  void _initChannelStates() {
+    _channelStates.clear();
+    _channelStates['Relay 1 (GPIO ${_pinConfig.relay1Pin})'] = false;
+    _channelStates['Relay 2 (GPIO ${_pinConfig.relay2Pin})'] = false;
+    _channelStates['Relay 3 (GPIO ${_pinConfig.relay3Pin})'] = false;
+    _channelStates['Relay 4 (GPIO ${_pinConfig.relay4Pin})'] = false;
+  }
+
   // PWM Controls State
-  int _pwmPin = 9;
+  late int _pwmPin = _pinConfig.pwmPin;
   int get pwmPin => _pwmPin;
-  final List<int> pwmAvailablePins = [3, 5, 6, 9, 10, 11];
 
   int _pwmValue = 0; // 0 to 255
   int get pwmValue => _pwmValue;
   int get pwmPercent => ((_pwmValue / 255) * 100).round();
+
+  // DAC (Digital-to-Analog True 8-bit output)
+  int _dacPin = 25;
+  int get dacPin => _dacPin;
+  int _dacValue = 0; // 0 to 255 (0V - 3.3V)
+  int get dacValue => _dacValue;
+  double get dacVoltage => (_dacValue / 255.0) * 3.3;
 
   // Text & Character Controls State
   String _selectedLineEnding = '\n';
@@ -175,6 +205,57 @@ class BluetoothProvider extends ChangeNotifier {
     notifyListeners();
   }
 
+  // Board & Pin Configuration Methods
+  void setBoard(BoardType type) {
+    _selectedBoard = MicrocontrollerBoard.getByType(type);
+    _pinConfig = BoardPinConfig.fromBoard(_selectedBoard);
+    _pwmPin = _pinConfig.pwmPin;
+    if (_selectedBoard.hasDac && _selectedBoard.dacPins.isNotEmpty) {
+      _dacPin = _selectedBoard.dacPins.first;
+    }
+    _initChannelStates();
+    _messages.add(
+      BluetoothMessage(
+        content: 'Active board switched to ${_selectedBoard.name}. Default GPIO pins updated.',
+        isTx: false,
+      ),
+    );
+    notifyListeners();
+  }
+
+  void updatePinConfig({
+    int? builtinLedPin,
+    int? relay1Pin,
+    int? relay2Pin,
+    int? relay3Pin,
+    int? relay4Pin,
+    int? pwmPin,
+  }) {
+    _pinConfig = _pinConfig.copyWith(
+      builtinLedPin: builtinLedPin,
+      relay1Pin: relay1Pin,
+      relay2Pin: relay2Pin,
+      relay3Pin: relay3Pin,
+      relay4Pin: relay4Pin,
+      pwmPin: pwmPin,
+    );
+    if (pwmPin != null) {
+      _pwmPin = pwmPin;
+    }
+    _initChannelStates();
+    notifyListeners();
+  }
+
+  void resetPinsToDefault() {
+    _pinConfig = BoardPinConfig.fromBoard(_selectedBoard);
+    _pwmPin = _pinConfig.pwmPin;
+    if (_selectedBoard.hasDac && _selectedBoard.dacPins.isNotEmpty) {
+      _dacPin = _selectedBoard.dacPins.first;
+    }
+    _initChannelStates();
+    notifyListeners();
+  }
+
   // LED Actions
   Future<void> toggleBuiltinLed() async {
     if (!isConnected) return;
@@ -199,19 +280,34 @@ class BluetoothProvider extends ChangeNotifier {
     _channelStates[channelName] = newState;
 
     String charToSend = '';
-    if (channelName.contains('LED 1')) {
+    int pin = _pinConfig.relay1Pin;
+    int relayNum = 1;
+
+    if (channelName.contains('Relay 1') || channelName.contains('LED 1')) {
       charToSend = newState ? 'A' : 'a';
-    } else if (channelName.contains('LED 2')) {
+      pin = _pinConfig.relay1Pin;
+      relayNum = 1;
+    } else if (channelName.contains('Relay 2') || channelName.contains('LED 2')) {
       charToSend = newState ? 'B' : 'b';
-    } else if (channelName.contains('LED 3')) {
+      pin = _pinConfig.relay2Pin;
+      relayNum = 2;
+    } else if (channelName.contains('Relay 3') || channelName.contains('LED 3')) {
       charToSend = newState ? 'C' : 'c';
-    } else if (channelName.contains('Relay')) {
-      charToSend = newState ? 'R' : 'r';
+      pin = _pinConfig.relay3Pin;
+      relayNum = 3;
+    } else if (channelName.contains('Relay 4') || channelName.contains('Relay')) {
+      charToSend = newState ? 'D' : 'd';
+      pin = _pinConfig.relay4Pin;
+      relayNum = 4;
     }
 
     if (charToSend.isNotEmpty) {
       await _bluetoothService.sendChar(charToSend);
     }
+    // Also send explicit string commands (e.g. "R1:1\n" and "RELAY:18:1\n")
+    await _bluetoothService.sendText('R$relayNum:${newState ? 1 : 0}', newline: '\n');
+    await _bluetoothService.sendText('RELAY:$pin:${newState ? 1 : 0}', newline: '\n');
+
     notifyListeners();
   }
 
@@ -233,6 +329,32 @@ class BluetoothProvider extends ChangeNotifier {
   Future<void> setPwmPercent(int percent) async {
     final val = ((percent.clamp(0, 100) / 100) * 255).round();
     await setPwmValue(val);
+  }
+
+  // DAC Actions (True 8-bit Analog Output on ESP32 GPIO 25 / 26)
+  void setDacPin(int pin) {
+    _dacPin = pin;
+    notifyListeners();
+  }
+
+  Future<void> setDacValue(int val) async {
+    final clamped = val.clamp(0, 255);
+    _dacValue = clamped;
+    notifyListeners();
+    if (isConnected) {
+      await _bluetoothService.sendText('DAC:$_dacPin:$clamped', newline: '\n');
+    }
+  }
+
+  // ADC Sensor & Touch Reading Actions
+  Future<void> requestAdcRead(int pin) async {
+    if (!isConnected) return;
+    await _bluetoothService.sendText('READ:ADC:$pin', newline: '\n');
+  }
+
+  Future<void> requestTouchRead(int pin) async {
+    if (!isConnected) return;
+    await _bluetoothService.sendText('READ:TOUCH:$pin', newline: '\n');
   }
 
   // Text Actions

@@ -7,6 +7,9 @@ class LedControlCard extends StatelessWidget {
   final ValueChanged<bool> onToggleBuiltin;
   final Map<String, bool> channelStates;
   final ValueChanged<String> onToggleChannel;
+  final int builtinLedPin;
+  final String boardName;
+  final VoidCallback? onConfigurePins;
 
   const LedControlCard({
     super.key,
@@ -15,6 +18,9 @@ class LedControlCard extends StatelessWidget {
     required this.onToggleBuiltin,
     required this.channelStates,
     required this.onToggleChannel,
+    this.builtinLedPin = 13,
+    this.boardName = 'Board',
+    this.onConfigurePins,
   });
 
   @override
@@ -38,57 +44,75 @@ class LedControlCard extends StatelessWidget {
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
+              Expanded(
+                child: Row(
+                  children: [
+                    Container(
+                      padding: const EdgeInsets.all(8),
+                      decoration: BoxDecoration(
+                        color: isBuiltinLedOn
+                            ? AppColors.lightOrange
+                            : AppColors.surfaceMuted,
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                      child: Icon(
+                        Icons.lightbulb_rounded,
+                        size: 20,
+                        color: isBuiltinLedOn
+                            ? AppColors.primaryOrange
+                            : AppColors.secondaryText,
+                      ),
+                    ),
+                    const SizedBox(width: 10),
+                    const Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            'LED & Relay Control',
+                            style: TextStyle(
+                              fontSize: 16,
+                              fontWeight: FontWeight.w700,
+                              color: AppColors.primaryText,
+                            ),
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                          Text(
+                            'Transmits "1" (ON) and "0" (OFF)',
+                            style: TextStyle(
+                              fontSize: 11,
+                              color: AppColors.secondaryText,
+                            ),
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
+              ),
               Row(
+                mainAxisSize: MainAxisSize.min,
                 children: [
-                  Container(
-                    padding: const EdgeInsets.all(8),
-                    decoration: BoxDecoration(
-                      color: isBuiltinLedOn
-                          ? AppColors.lightOrange
-                          : AppColors.surfaceMuted,
-                      borderRadius: BorderRadius.circular(8),
+                  if (onConfigurePins != null)
+                    IconButton(
+                      icon: const Icon(Icons.settings_suggest_rounded, size: 20),
+                      tooltip: 'Configure Pins',
+                      color: AppColors.primaryOrange,
+                      onPressed: onConfigurePins,
                     ),
-                    child: Icon(
-                      Icons.lightbulb_rounded,
-                      size: 20,
-                      color: isBuiltinLedOn
-                          ? AppColors.primaryOrange
-                          : AppColors.secondaryText,
+                  Transform.scale(
+                    scale: 0.9,
+                    child: Switch(
+                      value: isBuiltinLedOn,
+                      activeColor: Colors.white,
+                      activeTrackColor: AppColors.primaryOrange,
+                      inactiveThumbColor: AppColors.secondaryText,
+                      inactiveTrackColor: AppColors.border,
+                      onChanged: isConnected ? onToggleBuiltin : null,
                     ),
-                  ),
-                  const SizedBox(width: 10),
-                  const Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        'LED & Relay Control',
-                        style: TextStyle(
-                          fontSize: 16,
-                          fontWeight: FontWeight.w700,
-                          color: AppColors.primaryText,
-                        ),
-                      ),
-                      Text(
-                        'Transmits "1" (ON) and "0" (OFF)',
-                        style: TextStyle(
-                          fontSize: 11,
-                          color: AppColors.secondaryText,
-                        ),
-                      ),
-                    ],
                   ),
                 ],
-              ),
-              Transform.scale(
-                scale: 0.9,
-                child: Switch(
-                  value: isBuiltinLedOn,
-                  activeColor: Colors.white,
-                  activeTrackColor: AppColors.primaryOrange,
-                  inactiveThumbColor: AppColors.secondaryText,
-                  inactiveTrackColor: AppColors.border,
-                  onChanged: isConnected ? onToggleBuiltin : null,
-                ),
               ),
             ],
           ),
@@ -131,9 +155,9 @@ class LedControlCard extends StatelessWidget {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        const Text(
-                          'Arduino Built-in LED (Pin 13)',
-                          style: TextStyle(
+                        Text(
+                          '$boardName Built-in LED (GPIO $builtinLedPin)',
+                          style: const TextStyle(
                             fontSize: 14,
                             fontWeight: FontWeight.w600,
                             color: AppColors.primaryText,

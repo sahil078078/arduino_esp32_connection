@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import '../dialogs/board_pinout_sheet.dart';
+import '../dialogs/board_selection_dialog.dart';
+import '../dialogs/pin_configuration_dialog.dart';
 import '../providers/bluetooth_provider.dart';
 import '../services/url_launch.dart';
 import '../theme/app_colors.dart';
@@ -216,7 +219,126 @@ class SettingsScreen extends StatelessWidget {
 
               const SizedBox(height: 20),
 
-              // 3. Application Preferences
+              // 3. Microcontroller Board & GPIO Settings
+              const Text(
+                'Microcontroller Board & GPIO Pins',
+                style: TextStyle(
+                  fontSize: 14,
+                  fontWeight: FontWeight.w700,
+                  color: AppColors.primaryText,
+                ),
+              ),
+              const SizedBox(height: 10),
+
+              Container(
+                decoration: BoxDecoration(
+                  color: AppColors.cardBackground,
+                  borderRadius: BorderRadius.circular(14),
+                  border: Border.all(color: AppColors.border, width: 1),
+                ),
+                child: Column(
+                  children: [
+                    ListTile(
+                      leading: Container(
+                        padding: const EdgeInsets.all(8),
+                        decoration: BoxDecoration(
+                          color: AppColors.primaryOrange.withAlpha(20),
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                        child: const Icon(Icons.developer_board_rounded,
+                            color: AppColors.primaryOrange, size: 20),
+                      ),
+                      title: Text(
+                        bt.selectedBoard.name,
+                        style: const TextStyle(
+                          fontSize: 14,
+                          fontWeight: FontWeight.w700,
+                          color: AppColors.primaryText,
+                        ),
+                      ),
+                      subtitle: Text(
+                        '${bt.selectedBoard.chipFamily} • Tap to switch board',
+                        style: const TextStyle(
+                            fontSize: 11, color: AppColors.secondaryText),
+                      ),
+                      trailing: Container(
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 8, vertical: 4),
+                        decoration: BoxDecoration(
+                          color: AppColors.lightOrange,
+                          borderRadius: BorderRadius.circular(6),
+                        ),
+                        child: Text(
+                          bt.selectedBoard.badgeText,
+                          style: const TextStyle(
+                            fontSize: 10,
+                            fontWeight: FontWeight.w800,
+                            color: AppColors.primaryOrange,
+                          ),
+                        ),
+                      ),
+                      onTap: () => BoardSelectionDialog.show(context),
+                    ),
+                    const Divider(color: AppColors.border, height: 1),
+                    _buildSettingsTile(
+                      icon: Icons.tune_rounded,
+                      iconColor: AppColors.primaryOrange,
+                      title: 'Configure GPIO & Relay Pins',
+                      subtitle:
+                          'LED: GPIO ${bt.builtinLedPin} • Relays: ${bt.relay1Pin}, ${bt.relay2Pin}, ${bt.relay3Pin}, ${bt.relay4Pin}',
+                      onTap: () => PinConfigurationDialog.show(context),
+                    ),
+                    const Divider(color: AppColors.border, height: 1),
+                    _buildSettingsTile(
+                      icon: Icons.memory_rounded,
+                      iconColor: const Color(0xFF0284C7),
+                      title: 'View Board Pinout & Capabilities',
+                      subtitle:
+                          'PWM, ADC (12-bit), DAC (8-bit), and Touch pinout map',
+                      onTap: () => BoardPinoutSheet.show(context),
+                    ),
+                    const Divider(color: AppColors.border, height: 1),
+                    ListTile(
+                      leading: Container(
+                        padding: const EdgeInsets.all(8),
+                        decoration: BoxDecoration(
+                          color: AppColors.surfaceMuted,
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                        child: const Icon(Icons.restart_alt_rounded,
+                            color: AppColors.secondaryText, size: 20),
+                      ),
+                      title: const Text(
+                        'Reset Pins to Board Defaults',
+                        style: TextStyle(
+                          fontSize: 13,
+                          fontWeight: FontWeight.w600,
+                          color: AppColors.primaryText,
+                        ),
+                      ),
+                      subtitle: Text(
+                        'Restore factory pin mapping for ${bt.selectedBoard.shortName}',
+                        style: const TextStyle(
+                            fontSize: 11, color: AppColors.secondaryText),
+                      ),
+                      onTap: () {
+                        bt.resetPinsToDefault();
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(
+                            content: Text(
+                                'Pins restored to ${bt.selectedBoard.shortName} defaults!'),
+                            duration: const Duration(seconds: 2),
+                          ),
+                        );
+                      },
+                    ),
+                  ],
+                ),
+              ),
+
+              const SizedBox(height: 20),
+
+              // 4. Application Preferences
               const Text(
                 'Terminal & Console',
                 style: TextStyle(

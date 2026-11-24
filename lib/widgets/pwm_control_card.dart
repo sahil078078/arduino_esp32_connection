@@ -102,14 +102,14 @@ class PwmControlCard extends StatelessWidget {
                 ),
                 child: DropdownButtonHideUnderline(
                   child: DropdownButton<int>(
-                    value: pwmPin,
+                    value: availablePins.contains(pwmPin) ? pwmPin : (availablePins.isNotEmpty ? availablePins.first : pwmPin),
                     icon: const Icon(Icons.arrow_drop_down,
                         color: AppColors.secondaryText, size: 20),
-                    items: availablePins.map((p) {
+                    items: (Set<int>.from(availablePins)..add(pwmPin)).toList().map((p) {
                       return DropdownMenuItem<int>(
                         value: p,
                         child: Text(
-                          '~Pin D$p',
+                          'GPIO $p',
                           style: const TextStyle(
                             fontSize: 12,
                             fontWeight: FontWeight.w600,
