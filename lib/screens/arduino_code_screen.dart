@@ -3,6 +3,7 @@ import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
 import '../models/board_model.dart';
 import '../providers/bluetooth_provider.dart';
+import '../src/helper/app_toasting.dart';
 import '../theme/app_colors.dart';
 
 class ArduinoCodeScreen extends StatefulWidget {
@@ -614,13 +615,8 @@ void loop() {
                     ElevatedButton.icon(
                       onPressed: () {
                         Clipboard.setData(ClipboardData(text: _currentSketch));
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          SnackBar(
-                            content: Text(
-                                '$_currentBoardTitle copied to clipboard!'),
-                            backgroundColor: AppColors.primaryOrange,
-                          ),
-                        );
+                        AppToasting.showSuccessToast(
+                            '$_currentBoardTitle copied to clipboard!');
                       },
                       style: ElevatedButton.styleFrom(
                         backgroundColor: AppColors.primaryOrange,

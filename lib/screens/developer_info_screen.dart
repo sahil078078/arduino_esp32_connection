@@ -1,11 +1,9 @@
 import 'package:flutter/material.dart';
-import '../services/url_launch.dart';
+import '../src/helper/app_url.dart';
 import '../theme/app_colors.dart';
 
 class DeveloperInfoScreen extends StatelessWidget {
   const DeveloperInfoScreen({super.key});
-
-  static final UrlLaunch _launcher = UrlLaunch();
 
   @override
   Widget build(BuildContext context) {
@@ -140,10 +138,9 @@ class DeveloperInfoScreen extends StatelessWidget {
 
           // Primary Email Action Card
           InkWell(
-            onTap: () => _launcher.mail(
+            onTap: () => AppUrl.mail(
               email: 'sahil078078@gmail.com',
               subject: 'Arduino/Esp32 Controller Inquiry',
-              context: context,
             ),
             borderRadius: BorderRadius.circular(14),
             child: Container(
@@ -250,9 +247,8 @@ class DeveloperInfoScreen extends StatelessWidget {
 
                 // Email Row
                 InkWell(
-                  onTap: () => _launcher.mail(
+                  onTap: () => AppUrl.mail(
                     email: 'sahil078078@gmail.com',
-                    context: context,
                   ),
                   borderRadius: BorderRadius.circular(8),
                   child: Padding(
@@ -322,7 +318,7 @@ class DeveloperInfoScreen extends StatelessWidget {
     required IconData icon,
   }) {
     return InkWell(
-      onTap: () => _launcher.urlLaunch(url: url, context: context),
+      onTap: () => AppUrl.urlLaunch(url: url),
       borderRadius: BorderRadius.circular(14),
       child: Container(
         padding: const EdgeInsets.all(14),

@@ -2,10 +2,12 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'providers/bluetooth_provider.dart';
 import 'screens/splash_screen.dart';
+import 'src/interceptors/dio_client.dart';
 import 'theme/app_theme.dart';
 
 void main() {
   WidgetsFlutterBinding.ensureInitialized();
+  DioClient.instance.initDio();
   runApp(const ArduinoBluetoothApp());
 }
 

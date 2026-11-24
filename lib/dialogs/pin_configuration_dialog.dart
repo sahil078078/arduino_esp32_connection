@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../providers/bluetooth_provider.dart';
+import '../src/helper/app_toasting.dart';
 import '../theme/app_colors.dart';
 
 class PinConfigurationDialog extends StatefulWidget {
@@ -235,12 +236,7 @@ class _PinConfigurationDialogState extends State<PinConfigurationDialog> {
                     _relay4Pin = board.defaultRelayPins[3];
                     _pwmPin = board.defaultPwmPin;
                   });
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(
-                      content: Text('Pins reset to board default values.'),
-                      duration: Duration(seconds: 1),
-                    ),
-                  );
+                  AppToasting.showWarningToast('Pins reset to board defaults');
                 },
                 style: OutlinedButton.styleFrom(
                   foregroundColor: AppColors.secondaryText,
@@ -266,14 +262,8 @@ class _PinConfigurationDialogState extends State<PinConfigurationDialog> {
                       pwmPin: _pwmPin,
                     );
                     Navigator.of(context).pop();
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(
-                        content: Text(
-                          'Pins saved! Built-in: $_builtinLedPin, Relays: $_relay1Pin, $_relay2Pin, $_relay3Pin, $_relay4Pin',
-                        ),
-                        backgroundColor: AppColors.primaryOrange,
-                        duration: const Duration(seconds: 2),
-                      ),
+                    AppToasting.showSuccessToast(
+                      'Pins saved: LED $_builtinLedPin, Relays: $_relay1Pin, $_relay2Pin, $_relay3Pin, $_relay4Pin',
                     );
                   },
                   style: ElevatedButton.styleFrom(

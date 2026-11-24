@@ -4,14 +4,13 @@ import '../dialogs/board_pinout_sheet.dart';
 import '../dialogs/board_selection_dialog.dart';
 import '../dialogs/pin_configuration_dialog.dart';
 import '../providers/bluetooth_provider.dart';
-import '../services/url_launch.dart';
+import '../src/helper/app_toasting.dart';
+import '../src/helper/app_url.dart';
 import '../theme/app_colors.dart';
 import 'developer_info_screen.dart';
 
 class SettingsScreen extends StatelessWidget {
   const SettingsScreen({super.key});
-
-  static final UrlLaunch _launcher = UrlLaunch();
 
   @override
   Widget build(BuildContext context) {
@@ -175,9 +174,8 @@ class SettingsScreen extends StatelessWidget {
                       iconColor: const Color(0xFFF48024),
                       title: 'Stack Overflow Profile',
                       subtitle: 'sahil-prajapati',
-                      onTap: () => _launcher.urlLaunch(
+                      onTap: () => AppUrl.urlLaunch(
                         url: 'https://stackoverflow.com/users/sahil-prajapati',
-                        context: context,
                       ),
                     ),
                     const Divider(color: AppColors.border, height: 1),
@@ -186,9 +184,8 @@ class SettingsScreen extends StatelessWidget {
                       iconColor: const Color(0xFF24292E),
                       title: 'GitHub Repositories',
                       subtitle: 'github.com/sahil078078',
-                      onTap: () => _launcher.urlLaunch(
+                      onTap: () => AppUrl.urlLaunch(
                         url: 'https://github.com/sahil078078',
-                        context: context,
                       ),
                     ),
                     const Divider(color: AppColors.border, height: 1),
@@ -197,9 +194,8 @@ class SettingsScreen extends StatelessWidget {
                       iconColor: const Color(0xFFB92B27),
                       title: 'Quora Answers',
                       subtitle: 'quora.com/profile/Sahil-Prajapati-19',
-                      onTap: () => _launcher.urlLaunch(
+                      onTap: () => AppUrl.urlLaunch(
                         url: 'https://www.quora.com/profile/Sahil-Prajapati-19',
-                        context: context,
                       ),
                     ),
                     const Divider(color: AppColors.border, height: 1),
@@ -208,9 +204,8 @@ class SettingsScreen extends StatelessWidget {
                       iconColor: AppColors.primaryOrange,
                       title: 'Developer Email',
                       subtitle: 'sahil078078@gmail.com',
-                      onTap: () => _launcher.mail(
+                      onTap: () => AppUrl.mail(
                         email: 'sahil078078@gmail.com',
-                        context: context,
                       ),
                     ),
                   ],
@@ -323,13 +318,8 @@ class SettingsScreen extends StatelessWidget {
                       ),
                       onTap: () {
                         bt.resetPinsToDefault();
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          SnackBar(
-                            content: Text(
-                                'Pins restored to ${bt.selectedBoard.shortName} defaults!'),
-                            duration: const Duration(seconds: 2),
-                          ),
-                        );
+                        AppToasting.showSuccessToast(
+                            'Pins restored to ${bt.selectedBoard.shortName} defaults!');
                       },
                     ),
                   ],
@@ -408,7 +398,10 @@ class SettingsScreen extends StatelessWidget {
                           color: AppColors.secondaryText,
                         ),
                       ),
-                      onTap: () => bt.clearLogs(),
+                      onTap: () {
+                        bt.clearLogs();
+                        AppToasting.showSuccessToast('Terminal logs cleared!');
+                      },
                     ),
                   ],
                 ),
