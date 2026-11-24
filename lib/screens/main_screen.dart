@@ -27,7 +27,7 @@ class _MainScreenState extends State<MainScreen> {
     final isWideScreen = MediaQuery.of(context).size.width >= 800;
 
     final List<Widget> screens = [
-      const BluetoothConnectScreen(),
+      BluetoothConnectScreen(onOpenCodeScreen: () => _navigateToTab(3)),
       ControllerDashboardScreen(onOpenConnect: () => _navigateToTab(0)),
       const TerminalScreen(),
       const ArduinoCodeScreen(),
@@ -37,8 +37,8 @@ class _MainScreenState extends State<MainScreen> {
     final navItems = [
       _NavDescriptor(
         label: 'Connect',
-        icon: Icons.bluetooth_outlined,
-        activeIcon: Icons.bluetooth_connected_rounded,
+        icon: Icons.sensors_outlined,
+        activeIcon: Icons.sensors_rounded,
       ),
       _NavDescriptor(
         label: 'Controls',

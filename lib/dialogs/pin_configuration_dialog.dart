@@ -27,6 +27,11 @@ class _PinConfigurationDialogState extends State<PinConfigurationDialog> {
   late int _relay3Pin;
   late int _relay4Pin;
   late int _pwmPin;
+  late int _rgbRedPin;
+  late int _rgbGreenPin;
+  late int _rgbBluePin;
+  late bool _isCommonAnode;
+  late bool _isRgbBuiltin;
   bool _initialized = false;
 
   @override
@@ -40,6 +45,11 @@ class _PinConfigurationDialogState extends State<PinConfigurationDialog> {
       _relay3Pin = bt.pinConfig.relay3Pin;
       _relay4Pin = bt.pinConfig.relay4Pin;
       _pwmPin = bt.pinConfig.pwmPin;
+      _rgbRedPin = bt.pinConfig.rgbRedPin;
+      _rgbGreenPin = bt.pinConfig.rgbGreenPin;
+      _rgbBluePin = bt.pinConfig.rgbBluePin;
+      _isCommonAnode = bt.pinConfig.isCommonAnode;
+      _isRgbBuiltin = bt.pinConfig.isRgbBuiltin;
       _initialized = true;
     }
   }
@@ -214,6 +224,127 @@ class _PinConfigurationDialogState extends State<PinConfigurationDialog> {
                   onChanged: (p) => setState(() => _pwmPin = p),
                 ),
                 const SizedBox(height: 16),
+
+                // 4. Non-Addressable RGB LED Pins (4 legs: R, G, B + Common)
+                _buildPinSectionTitle('4-Pin RGB LED Configuration (Non-Addressable)'),
+                _buildPinSelectorTile(
+                  label: 'Red Channel (Leg 1)',
+                  description: 'PWM pin for Red diode',
+                  currentPin: _rgbRedPin,
+                  pins: getDropdownPins(_rgbRedPin),
+                  icon: Icons.palette_outlined,
+                  onChanged: (p) => setState(() => _rgbRedPin = p),
+                ),
+                const SizedBox(height: 8),
+                _buildPinSelectorTile(
+                  label: 'Green Channel (Leg 3)',
+                  description: 'PWM pin for Green diode',
+                  currentPin: _rgbGreenPin,
+                  pins: getDropdownPins(_rgbGreenPin),
+                  icon: Icons.palette_outlined,
+                  onChanged: (p) => setState(() => _rgbGreenPin = p),
+                ),
+                const SizedBox(height: 8),
+                _buildPinSelectorTile(
+                  label: 'Blue Channel (Leg 4)',
+                  description: 'PWM pin for Blue diode',
+                  currentPin: _rgbBluePin,
+                  pins: getDropdownPins(_rgbBluePin),
+                  icon: Icons.palette_outlined,
+                  onChanged: (p) => setState(() => _rgbBluePin = p),
+                ),
+                const SizedBox(height: 10),
+
+                // Common Anode vs Common Cathode switch
+                Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                  decoration: BoxDecoration(
+                    color: AppColors.appBackground,
+                    borderRadius: BorderRadius.circular(12),
+                    border: Border.all(color: AppColors.border, width: 1),
+                  ),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            const Text(
+                              'Common Leg Polarity',
+                              style: TextStyle(
+                                fontSize: 13,
+                                fontWeight: FontWeight.w600,
+                                color: AppColors.primaryText,
+                              ),
+                            ),
+                            Text(
+                              _isCommonAnode
+                                  ? 'Common Anode (+VCC / Inverted PWM)'
+                                  : 'Common Cathode (GND / Normal PWM)',
+                              style: const TextStyle(
+                                fontSize: 11,
+                                color: AppColors.secondaryText,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                      Switch(
+                        value: _isCommonAnode,
+                        activeColor: AppColors.primaryOrange,
+                        onChanged: (v) => setState(() => _isCommonAnode = v),
+                      ),
+                    ],
+                  ),
+                ),
+
+                if (board.builtinRgbPin != null) ...[
+                  const SizedBox(height: 8),
+                  Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                    decoration: BoxDecoration(
+                      color: AppColors.appBackground,
+                      borderRadius: BorderRadius.circular(12),
+                      border: Border.all(color: AppColors.border, width: 1),
+                    ),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              const Text(
+                                'Target Hardware LED',
+                                style: TextStyle(
+                                  fontSize: 13,
+                                  fontWeight: FontWeight.w600,
+                                  color: AppColors.primaryText,
+                                ),
+                              ),
+                              Text(
+                                _isRgbBuiltin
+                                    ? 'On-board LED (GPIO ${board.builtinRgbPin})'
+                                    : 'External 4-Pin RGB LED Module',
+                                style: const TextStyle(
+                                  fontSize: 11,
+                                  color: AppColors.secondaryText,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                        Switch(
+                          value: _isRgbBuiltin,
+                          activeColor: AppColors.primaryOrange,
+                          onChanged: (v) => setState(() => _isRgbBuiltin = v),
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+                const SizedBox(height: 16),
               ],
             ),
           ),
@@ -235,6 +366,11 @@ class _PinConfigurationDialogState extends State<PinConfigurationDialog> {
                     _relay3Pin = board.defaultRelayPins[2];
                     _relay4Pin = board.defaultRelayPins[3];
                     _pwmPin = board.defaultPwmPin;
+                    _rgbRedPin = board.defaultRgbPins[0];
+                    _rgbGreenPin = board.defaultRgbPins[1];
+                    _rgbBluePin = board.defaultRgbPins[2];
+                    _isCommonAnode = false;
+                    _isRgbBuiltin = board.builtinRgbPin != null;
                   });
                   AppToasting.showWarningToast('Pins reset to board defaults');
                 },
@@ -260,10 +396,15 @@ class _PinConfigurationDialogState extends State<PinConfigurationDialog> {
                       relay3Pin: _relay3Pin,
                       relay4Pin: _relay4Pin,
                       pwmPin: _pwmPin,
+                      rgbRedPin: _rgbRedPin,
+                      rgbGreenPin: _rgbGreenPin,
+                      rgbBluePin: _rgbBluePin,
+                      isCommonAnode: _isCommonAnode,
+                      isRgbBuiltin: _isRgbBuiltin,
                     );
                     Navigator.of(context).pop();
                     AppToasting.showSuccessToast(
-                      'Pins saved: LED $_builtinLedPin, Relays: $_relay1Pin, $_relay2Pin, $_relay3Pin, $_relay4Pin',
+                      'Pins saved: Relays ($_relay1Pin, $_relay2Pin, $_relay3Pin, $_relay4Pin), RGB ($_rgbRedPin, $_rgbGreenPin, $_rgbBluePin)',
                     );
                   },
                   style: ElevatedButton.styleFrom(

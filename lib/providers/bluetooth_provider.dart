@@ -3,18 +3,40 @@ import 'package:flutter/foundation.dart';
 import '../models/board_model.dart';
 import '../models/bluetooth_device_model.dart';
 import '../models/bluetooth_message.dart';
+import '../models/wifi_device_model.dart';
 import '../services/bluetooth_service.dart';
+import '../services/wifi_service.dart';
+
+enum ConnectionMedium {
+  bluetooth,
+  wifi,
+}
 
 class BluetoothProvider extends ChangeNotifier {
   final BluetoothService _bluetoothService;
+  final WifiService _wifiService;
   StreamSubscription<List<BluetoothDeviceModel>>? _devicesSub;
   StreamSubscription<BluetoothMessage>? _messagesSub;
   StreamSubscription<String>? _speechSub;
   StreamSubscription<String>? _speechStatusSub;
   StreamSubscription<bool>? _btStateSub;
+  StreamSubscription<BluetoothMessage>? _wifiMessagesSub;
+  StreamSubscription<bool>? _wifiStateSub;
 
-  BluetoothProvider({BluetoothService? bluetoothService, bool autoScan = false})
-      : _bluetoothService = bluetoothService ?? DefaultBluetoothService() {
+  ConnectionMedium _connectionMedium = ConnectionMedium.bluetooth;
+  ConnectionMedium get connectionMedium => _connectionMedium;
+
+  void setConnectionMedium(ConnectionMedium medium) {
+    _connectionMedium = medium;
+    notifyListeners();
+  }
+
+  BluetoothProvider({
+    BluetoothService? bluetoothService,
+    WifiService? wifiService,
+    bool autoScan = false,
+  })  : _bluetoothService = bluetoothService ?? DefaultBluetoothService(),
+        _wifiService = wifiService ?? DefaultWifiService() {
     _initStreams();
     _initChannelStates();
     if (autoScan) {
@@ -49,9 +71,59 @@ class BluetoothProvider extends ChangeNotifier {
   bool get isBluetoothEnabled => _isBluetoothEnabled;
 
   bool get isScanning => _bluetoothService.isScanning;
-  bool get isConnected => _bluetoothService.isConnected;
-  bool get isConnecting => _bluetoothService.isConnecting;
+  bool get isConnected {
+    if (_connectionMedium == ConnectionMedium.bluetooth) {
+      return _bluetoothService.isConnected;
+    }
+    return _wifiService.isConnected;
+  }
+
+  bool get isConnecting {
+    if (_connectionMedium == ConnectionMedium.bluetooth) {
+      return _bluetoothService.isConnecting;
+    }
+    return _wifiService.isConnecting;
+  }
+
+  bool get isBluetoothConnected => _bluetoothService.isConnected;
+  bool get isWifiConnected => _wifiService.isConnected;
+  bool get isWifiConnecting => _wifiService.isConnecting;
+  String get wifiIp => _wifiService.ip;
+  int get wifiPort => _wifiService.port;
+  int get wifiLatencyMs => _wifiService.latencyMs;
+  WifiProtocol get wifiProtocol => _wifiService.protocol;
+  WifiDeviceModel get currentWifiDevice => _wifiService.currentDevice;
+
+  String get activeConnectionTitle {
+    if (_connectionMedium == ConnectionMedium.wifi) {
+      if (_wifiService.isConnected) {
+        return 'ESP32 WiFi (${_wifiService.ip}:${_wifiService.port})';
+      }
+      return 'ESP32 WiFi (Disconnected)';
+    }
+    if (_bluetoothService.isConnected && _bluetoothService.connectedDevice != null) {
+      return _bluetoothService.connectedDevice!.name;
+    }
+    return 'Bluetooth (Disconnected)';
+  }
+
   BluetoothDeviceModel? get connectedDevice => _bluetoothService.connectedDevice;
+
+  // RGB LED State (Non-Addressable 4-pin RGB LED)
+  int _rgbRed = 0;
+  int _rgbGreen = 0;
+  int _rgbBlue = 0;
+  bool _isRgbOn = false;
+
+  int get rgbRed => _rgbRed;
+  int get rgbGreen => _rgbGreen;
+  int get rgbBlue => _rgbBlue;
+  bool get isRgbOn => _isRgbOn;
+  int get rgbRedPin => _pinConfig.rgbRedPin;
+  int get rgbGreenPin => _pinConfig.rgbGreenPin;
+  int get rgbBluePin => _pinConfig.rgbBluePin;
+  bool get isCommonAnode => _pinConfig.isCommonAnode;
+  bool get isRgbBuiltin => _pinConfig.isRgbBuiltin;
 
   // LED Controls State
   bool _isBuiltinLedOn = false;
@@ -142,6 +214,18 @@ class BluetoothProvider extends ChangeNotifier {
       notifyListeners();
     });
 
+    _wifiMessagesSub = _wifiService.messagesStream.listen((msg) {
+      _messages.add(msg);
+      if (_messages.length > 250) {
+        _messages.removeAt(0);
+      }
+      notifyListeners();
+    });
+
+    _wifiStateSub = _wifiService.connectionStateStream.listen((_) {
+      notifyListeners();
+    });
+
     _checkInitialBluetoothState();
   }
 
@@ -205,6 +289,14 @@ class BluetoothProvider extends ChangeNotifier {
     notifyListeners();
   }
 
+  Future<void> disconnect() async {
+    if (_connectionMedium == ConnectionMedium.bluetooth) {
+      await disconnectDevice();
+    } else {
+      await disconnectWifi();
+    }
+  }
+
   // Board & Pin Configuration Methods
   void setBoard(BoardType type) {
     _selectedBoard = MicrocontrollerBoard.getByType(type);
@@ -230,6 +322,11 @@ class BluetoothProvider extends ChangeNotifier {
     int? relay3Pin,
     int? relay4Pin,
     int? pwmPin,
+    int? rgbRedPin,
+    int? rgbGreenPin,
+    int? rgbBluePin,
+    bool? isCommonAnode,
+    bool? isRgbBuiltin,
   }) {
     _pinConfig = _pinConfig.copyWith(
       builtinLedPin: builtinLedPin,
@@ -238,6 +335,11 @@ class BluetoothProvider extends ChangeNotifier {
       relay3Pin: relay3Pin,
       relay4Pin: relay4Pin,
       pwmPin: pwmPin,
+      rgbRedPin: rgbRedPin,
+      rgbGreenPin: rgbGreenPin,
+      rgbBluePin: rgbBluePin,
+      isCommonAnode: isCommonAnode,
+      isRgbBuiltin: isRgbBuiltin,
     );
     if (pwmPin != null) {
       _pwmPin = pwmPin;
@@ -256,12 +358,112 @@ class BluetoothProvider extends ChangeNotifier {
     notifyListeners();
   }
 
+  // WiFi Connection Actions
+  Future<bool> connectWifi({
+    required String ip,
+    required int port,
+    WifiProtocol protocol = WifiProtocol.http,
+    WifiMode mode = WifiMode.softAp,
+  }) async {
+    _connectionMedium = ConnectionMedium.wifi;
+    notifyListeners();
+    final ok = await _wifiService.connect(
+      ip: ip,
+      port: port,
+      protocol: protocol,
+      mode: mode,
+    );
+    notifyListeners();
+    return ok;
+  }
+
+  Future<void> disconnectWifi() async {
+    await _wifiService.disconnect();
+    notifyListeners();
+  }
+
+  Future<int?> testPingWifi({required String ip, required int port}) async {
+    final latency = await _wifiService.testPing(ip: ip, port: port);
+    notifyListeners();
+    return latency;
+  }
+
+  // RGB LED Actions (4-pin Non-Addressable R, G, B + Common Anode/Cathode)
+  void updateRgbPins({
+    int? rPin,
+    int? gPin,
+    int? bPin,
+    bool? isCommonAnode,
+    bool? isRgbBuiltin,
+  }) {
+    _pinConfig = _pinConfig.copyWith(
+      rgbRedPin: rPin,
+      rgbGreenPin: gPin,
+      rgbBluePin: bPin,
+      isCommonAnode: isCommonAnode,
+      isRgbBuiltin: isRgbBuiltin,
+    );
+    notifyListeners();
+  }
+
+  Future<void> setRgbColor(int r, int g, int b) async {
+    final cr = r.clamp(0, 255);
+    final cg = g.clamp(0, 255);
+    final cb = b.clamp(0, 255);
+
+    _rgbRed = cr;
+    _rgbGreen = cg;
+    _rgbBlue = cb;
+    _isRgbOn = (cr > 0 || cg > 0 || cb > 0);
+    notifyListeners();
+
+    if (isConnected) {
+      // In Common Anode mode, PWM is inverted (0 is max brightness, 255 is OFF)
+      final txR = _pinConfig.isCommonAnode ? (255 - cr) : cr;
+      final txG = _pinConfig.isCommonAnode ? (255 - cg) : cg;
+      final txB = _pinConfig.isCommonAnode ? (255 - cb) : cb;
+
+      final payload = 'RGB:$txR:$txG:$txB';
+      if (_connectionMedium == ConnectionMedium.bluetooth) {
+        await _bluetoothService.sendText(payload, newline: '\n');
+      } else {
+        await _wifiService.sendText(payload, newline: '\n');
+      }
+    }
+  }
+
+  Future<void> toggleRgbPower(bool state) async {
+    if (state) {
+      if (_rgbRed == 0 && _rgbGreen == 0 && _rgbBlue == 0) {
+        // Default to Full White when powered on from off
+        await setRgbColor(255, 255, 255);
+      } else {
+        await setRgbColor(_rgbRed, _rgbGreen, _rgbBlue);
+      }
+    } else {
+      _isRgbOn = false;
+      notifyListeners();
+      if (isConnected) {
+        final tx = _pinConfig.isCommonAnode ? 'RGB:255:255:255' : 'RGB:0:0:0';
+        if (_connectionMedium == ConnectionMedium.bluetooth) {
+          await _bluetoothService.sendText(tx, newline: '\n');
+        } else {
+          await _wifiService.sendText(tx, newline: '\n');
+        }
+      }
+    }
+  }
+
   // LED Actions
   Future<void> toggleBuiltinLed() async {
     if (!isConnected) return;
     _isBuiltinLedOn = !_isBuiltinLedOn;
     final char = _isBuiltinLedOn ? '1' : '0';
-    await _bluetoothService.sendChar(char);
+    if (_connectionMedium == ConnectionMedium.bluetooth) {
+      await _bluetoothService.sendChar(char);
+    } else {
+      await _wifiService.sendChar(char);
+    }
     notifyListeners();
   }
 
@@ -269,7 +471,11 @@ class BluetoothProvider extends ChangeNotifier {
     if (!isConnected) return;
     _isBuiltinLedOn = state;
     final char = state ? '1' : '0';
-    await _bluetoothService.sendChar(char);
+    if (_connectionMedium == ConnectionMedium.bluetooth) {
+      await _bluetoothService.sendChar(char);
+    } else {
+      await _wifiService.sendChar(char);
+    }
     notifyListeners();
   }
 
@@ -301,12 +507,19 @@ class BluetoothProvider extends ChangeNotifier {
       relayNum = 4;
     }
 
-    if (charToSend.isNotEmpty) {
-      await _bluetoothService.sendChar(charToSend);
+    if (_connectionMedium == ConnectionMedium.bluetooth) {
+      if (charToSend.isNotEmpty) {
+        await _bluetoothService.sendChar(charToSend);
+      }
+      await _bluetoothService.sendText('R$relayNum:${newState ? 1 : 0}', newline: '\n');
+      await _bluetoothService.sendText('RELAY:$pin:${newState ? 1 : 0}', newline: '\n');
+    } else {
+      if (charToSend.isNotEmpty) {
+        await _wifiService.sendChar(charToSend);
+      }
+      await _wifiService.sendText('R$relayNum:${newState ? 1 : 0}', newline: '\n');
+      await _wifiService.sendText('RELAY:$pin:${newState ? 1 : 0}', newline: '\n');
     }
-    // Also send explicit string commands (e.g. "R1:1\n" and "RELAY:18:1\n")
-    await _bluetoothService.sendText('R$relayNum:${newState ? 1 : 0}', newline: '\n');
-    await _bluetoothService.sendText('RELAY:$pin:${newState ? 1 : 0}', newline: '\n');
 
     notifyListeners();
   }
@@ -322,7 +535,11 @@ class BluetoothProvider extends ChangeNotifier {
     _pwmValue = clamped;
     notifyListeners();
     if (isConnected) {
-      await _bluetoothService.sendPwm(_pwmPin, clamped);
+      if (_connectionMedium == ConnectionMedium.bluetooth) {
+        await _bluetoothService.sendPwm(_pwmPin, clamped);
+      } else {
+        await _wifiService.sendPwm(_pwmPin, clamped);
+      }
     }
   }
 
@@ -342,19 +559,31 @@ class BluetoothProvider extends ChangeNotifier {
     _dacValue = clamped;
     notifyListeners();
     if (isConnected) {
-      await _bluetoothService.sendText('DAC:$_dacPin:$clamped', newline: '\n');
+      if (_connectionMedium == ConnectionMedium.bluetooth) {
+        await _bluetoothService.sendText('DAC:$_dacPin:$clamped', newline: '\n');
+      } else {
+        await _wifiService.sendDac(_dacPin, clamped);
+      }
     }
   }
 
   // ADC Sensor & Touch Reading Actions
   Future<void> requestAdcRead(int pin) async {
     if (!isConnected) return;
-    await _bluetoothService.sendText('READ:ADC:$pin', newline: '\n');
+    if (_connectionMedium == ConnectionMedium.bluetooth) {
+      await _bluetoothService.sendText('READ:ADC:$pin', newline: '\n');
+    } else {
+      await _wifiService.requestAdc(pin);
+    }
   }
 
   Future<void> requestTouchRead(int pin) async {
     if (!isConnected) return;
-    await _bluetoothService.sendText('READ:TOUCH:$pin', newline: '\n');
+    if (_connectionMedium == ConnectionMedium.bluetooth) {
+      await _bluetoothService.sendText('READ:TOUCH:$pin', newline: '\n');
+    } else {
+      await _wifiService.requestTouch(pin);
+    }
   }
 
   // Text Actions
@@ -371,13 +600,21 @@ class BluetoothProvider extends ChangeNotifier {
 
   Future<bool> sendCustomText(String text) async {
     if (text.trim().isEmpty) return false;
-    return await _bluetoothService.sendText(text.trim(), newline: _selectedLineEnding);
+    if (_connectionMedium == ConnectionMedium.bluetooth) {
+      return await _bluetoothService.sendText(text.trim(), newline: _selectedLineEnding);
+    } else {
+      return await _wifiService.sendText(text.trim(), newline: _selectedLineEnding);
+    }
   }
 
   // Character Actions
   Future<bool> sendSingleChar(String char) async {
     if (char.isEmpty) return false;
-    return await _bluetoothService.sendChar(char[0]);
+    if (_connectionMedium == ConnectionMedium.bluetooth) {
+      return await _bluetoothService.sendChar(char[0]);
+    } else {
+      return await _wifiService.sendChar(char[0]);
+    }
   }
 
   // Voice Command Actions
@@ -488,8 +725,8 @@ class BluetoothProvider extends ChangeNotifier {
     _lastTransmittedVoiceCommand = cmdToSend;
     notifyListeners();
 
-    // Transmit string message to Arduino Bluetooth Terminal
-    return await _bluetoothService.sendText(cmdToSend, newline: '\n');
+    // Transmit message to active medium (Bluetooth or WiFi)
+    return await sendCustomText(cmdToSend);
   }
 
   // Terminal Logs
@@ -512,6 +749,9 @@ class BluetoothProvider extends ChangeNotifier {
     _speechSub?.cancel();
     _speechStatusSub?.cancel();
     _btStateSub?.cancel();
+    _wifiMessagesSub?.cancel();
+    _wifiStateSub?.cancel();
+    _wifiService.dispose();
     super.dispose();
   }
 }

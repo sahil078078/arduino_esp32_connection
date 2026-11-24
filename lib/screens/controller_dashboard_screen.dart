@@ -8,6 +8,7 @@ import '../theme/app_colors.dart';
 import '../widgets/char_sender_card.dart';
 import '../widgets/led_control_card.dart';
 import '../widgets/pwm_control_card.dart';
+import '../widgets/rgb_led_control_card.dart';
 import '../widgets/sensors_dac_card.dart';
 import '../widgets/status_badge.dart';
 import '../widgets/text_sender_card.dart';
@@ -95,27 +96,33 @@ class ControllerDashboardScreen extends StatelessWidget {
                   ),
                   child: Row(
                     children: [
-                      const Icon(
-                        Icons.bluetooth_searching_rounded,
+                      Icon(
+                        bt.connectionMedium == ConnectionMedium.wifi
+                            ? Icons.wifi_off_rounded
+                            : Icons.bluetooth_searching_rounded,
                         color: AppColors.primaryOrange,
                         size: 22,
                       ),
                       const SizedBox(width: 12),
-                      const Expanded(
+                      Expanded(
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             Text(
-                              'Bluetooth Not Connected',
-                              style: TextStyle(
+                              bt.connectionMedium == ConnectionMedium.wifi
+                                  ? 'WiFi Not Connected'
+                                  : 'Bluetooth Not Connected',
+                              style: const TextStyle(
                                 fontSize: 13,
                                 fontWeight: FontWeight.w700,
                                 color: AppColors.primaryOrange,
                               ),
                             ),
                             Text(
-                              'Connect to your HC-05 / HC-06 to control hardware.',
-                              style: TextStyle(
+                              bt.connectionMedium == ConnectionMedium.wifi
+                                  ? 'Connect to ESP32 WiFi hotspot or local network.'
+                                  : 'Connect to Arduino/ESP32 via Bluetooth.',
+                              style: const TextStyle(
                                 fontSize: 11,
                                 color: AppColors.primaryText,
                               ),
@@ -135,6 +142,43 @@ class ControllerDashboardScreen extends StatelessWidget {
                         ),
                         child:
                             const Text('Connect', style: TextStyle(fontSize: 12)),
+                      ),
+                    ],
+                  ),
+                )
+              else
+                Container(
+                  margin: const EdgeInsets.only(bottom: 16),
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+                  decoration: BoxDecoration(
+                    color: const Color(0xFFF0FDF4),
+                    borderRadius: BorderRadius.circular(12),
+                    border: Border.all(
+                      color: const Color(0xFF22C55E).withAlpha(80),
+                      width: 1,
+                    ),
+                  ),
+                  child: Row(
+                    children: [
+                      Icon(
+                        bt.connectionMedium == ConnectionMedium.wifi
+                            ? Icons.wifi_rounded
+                            : Icons.bluetooth_connected_rounded,
+                        color: const Color(0xFF16A34A),
+                        size: 20,
+                      ),
+                      const SizedBox(width: 10),
+                      Expanded(
+                        child: Text(
+                          'Connected: ${bt.activeConnectionTitle}',
+                          style: const TextStyle(
+                            fontSize: 12.5,
+                            fontWeight: FontWeight.w700,
+                            color: Color(0xFF15803D),
+                          ),
+                          overflow: TextOverflow.ellipsis,
+                        ),
                       ),
                     ],
                   ),
@@ -232,7 +276,35 @@ class ControllerDashboardScreen extends StatelessWidget {
 
               const SizedBox(height: 16),
 
-              // 2. PWM Duty Cycle Control Card
+              // 2. RGB LED Control Card (4-Pin Non-Addressable R, G, B)
+              RgbLedControlCard(
+                isConnected: bt.isConnected,
+                isRgbOn: bt.isRgbOn,
+                red: bt.rgbRed,
+                green: bt.rgbGreen,
+                blue: bt.rgbBlue,
+                redPin: bt.rgbRedPin,
+                greenPin: bt.rgbGreenPin,
+                bluePin: bt.rgbBluePin,
+                isCommonAnode: bt.isCommonAnode,
+                isRgbBuiltin: bt.isRgbBuiltin,
+                boardHasBuiltinRgb: bt.selectedBoard.builtinRgbPin != null,
+                onTogglePower: (on) => bt.toggleRgbPower(on),
+                onColorChanged: (r, g, b) => bt.setRgbColor(r, g, b),
+                onConfigChanged: ({rPin, gPin, bPin, isCommonAnode, isRgbBuiltin}) {
+                  bt.updateRgbPins(
+                    rPin: rPin,
+                    gPin: gPin,
+                    bPin: bPin,
+                    isCommonAnode: isCommonAnode,
+                    isRgbBuiltin: isRgbBuiltin,
+                  );
+                },
+              ),
+
+              const SizedBox(height: 16),
+
+              // 3. PWM Duty Cycle Control Card
               PwmControlCard(
                 isConnected: bt.isConnected,
                 pwmPin: bt.pwmPin,

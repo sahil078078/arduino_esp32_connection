@@ -4,6 +4,7 @@ import 'package:arduino_control_app/main.dart';
 import 'package:arduino_control_app/screens/splash_screen.dart';
 import 'package:arduino_control_app/widgets/led_control_card.dart';
 import 'package:arduino_control_app/widgets/pwm_control_card.dart';
+import 'package:arduino_control_app/widgets/rgb_led_control_card.dart';
 import 'package:arduino_control_app/widgets/sensors_dac_card.dart';
 import 'package:arduino_control_app/widgets/voice_control_card.dart';
 
@@ -39,9 +40,17 @@ void main() {
 
     // 4. Verify core cards are present on dashboard
     expect(find.byType(LedControlCard), findsOneWidget);
-    expect(find.byType(PwmControlCard), findsOneWidget);
-    expect(find.byType(SensorsDacCard), findsOneWidget);
+    expect(find.byType(RgbLedControlCard), findsOneWidget);
     expect(find.text('LED & Relay Control'), findsOneWidget);
+    expect(find.text('RGB LED Module (4-Pin)'), findsOneWidget);
+
+    // Scroll to PwmControlCard in the dashboard list
+    await tester.scrollUntilVisible(
+      find.byType(PwmControlCard),
+      300,
+      scrollable: find.byType(Scrollable).first,
+    );
+    expect(find.byType(PwmControlCard), findsOneWidget);
     expect(find.text('PWM Duty Cycle'), findsOneWidget);
 
     // Scroll to VoiceControlCard in the dashboard list

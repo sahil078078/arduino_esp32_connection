@@ -19,6 +19,8 @@ class MicrocontrollerBoard {
   final int defaultBuiltinLedPin;
   final int defaultPwmPin;
   final List<int> defaultRelayPins; // [Relay 1, Relay 2, Relay 3, Relay 4]
+  final List<int> defaultRgbPins; // [Red, Green, Blue]
+  final int? builtinRgbPin;
 
   // Capabilities
   final List<int> pwmPins;
@@ -47,6 +49,8 @@ class MicrocontrollerBoard {
     required this.defaultBuiltinLedPin,
     required this.defaultPwmPin,
     required this.defaultRelayPins,
+    required this.defaultRgbPins,
+    this.builtinRgbPin,
     required this.pwmPins,
     required this.adcPins,
     required this.dacPins,
@@ -73,6 +77,7 @@ class MicrocontrollerBoard {
     defaultBuiltinLedPin: 13,
     defaultPwmPin: 9,
     defaultRelayPins: [7, 8, 4, 12],
+    defaultRgbPins: [9, 10, 11],
     pwmPins: [3, 5, 6, 9, 10, 11],
     adcPins: [14, 15, 16, 17, 18, 19], // A0=14 to A5=19
     dacPins: [], // No true DAC on Arduino Uno
@@ -118,6 +123,7 @@ class MicrocontrollerBoard {
     defaultBuiltinLedPin: 2,
     defaultPwmPin: 16,
     defaultRelayPins: [18, 19, 21, 22],
+    defaultRgbPins: [25, 26, 27],
     pwmPins: [2, 4, 5, 12, 13, 14, 15, 16, 17, 18, 19, 21, 22, 23, 25, 26, 27, 32, 33],
     adcPins: [32, 33, 34, 35, 36, 39, 0, 2, 4, 12, 13, 14, 15, 25, 26, 27], // 12-bit ADC (0-4095)
     dacPins: [25, 26], // DAC1 (GPIO 25), DAC2 (GPIO 26) - 8-bit True Analog
@@ -168,6 +174,8 @@ class MicrocontrollerBoard {
     defaultBuiltinLedPin: 48, // WS2812 RGB LED on GPIO 48
     defaultPwmPin: 18,
     defaultRelayPins: [4, 5, 6, 7],
+    defaultRgbPins: [4, 5, 6],
+    builtinRgbPin: 48,
     pwmPins: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 38, 39, 40, 41, 42, 47, 48],
     adcPins: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20],
     dacPins: [], // Hardware DAC removed on S3
@@ -231,6 +239,11 @@ class BoardPinConfig {
   final int relay3Pin;
   final int relay4Pin;
   final int pwmPin;
+  final int rgbRedPin;
+  final int rgbGreenPin;
+  final int rgbBluePin;
+  final bool isCommonAnode;
+  final bool isRgbBuiltin;
 
   const BoardPinConfig({
     required this.builtinLedPin,
@@ -239,6 +252,11 @@ class BoardPinConfig {
     required this.relay3Pin,
     required this.relay4Pin,
     required this.pwmPin,
+    this.rgbRedPin = 4,
+    this.rgbGreenPin = 5,
+    this.rgbBluePin = 6,
+    this.isCommonAnode = false,
+    this.isRgbBuiltin = false,
   });
 
   factory BoardPinConfig.fromBoard(MicrocontrollerBoard board) {
@@ -249,6 +267,11 @@ class BoardPinConfig {
       relay3Pin: board.defaultRelayPins[2],
       relay4Pin: board.defaultRelayPins[3],
       pwmPin: board.defaultPwmPin,
+      rgbRedPin: board.defaultRgbPins[0],
+      rgbGreenPin: board.defaultRgbPins[1],
+      rgbBluePin: board.defaultRgbPins[2],
+      isCommonAnode: false,
+      isRgbBuiltin: board.builtinRgbPin != null,
     );
   }
 
@@ -259,6 +282,11 @@ class BoardPinConfig {
     int? relay3Pin,
     int? relay4Pin,
     int? pwmPin,
+    int? rgbRedPin,
+    int? rgbGreenPin,
+    int? rgbBluePin,
+    bool? isCommonAnode,
+    bool? isRgbBuiltin,
   }) {
     return BoardPinConfig(
       builtinLedPin: builtinLedPin ?? this.builtinLedPin,
@@ -267,6 +295,11 @@ class BoardPinConfig {
       relay3Pin: relay3Pin ?? this.relay3Pin,
       relay4Pin: relay4Pin ?? this.relay4Pin,
       pwmPin: pwmPin ?? this.pwmPin,
+      rgbRedPin: rgbRedPin ?? this.rgbRedPin,
+      rgbGreenPin: rgbGreenPin ?? this.rgbGreenPin,
+      rgbBluePin: rgbBluePin ?? this.rgbBluePin,
+      isCommonAnode: isCommonAnode ?? this.isCommonAnode,
+      isRgbBuiltin: isRgbBuiltin ?? this.isRgbBuiltin,
     );
   }
 
