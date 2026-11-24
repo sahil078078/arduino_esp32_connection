@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../models/bluetooth_message.dart';
 import '../providers/bluetooth_provider.dart';
+import '../src/commons/btn/custom_btn.dart';
 import '../theme/app_colors.dart';
 import '../widgets/status_badge.dart';
 
@@ -194,25 +195,16 @@ class _TerminalScreenState extends State<TerminalScreen> {
                         ),
                       ),
                       const SizedBox(width: 8),
-                      ElevatedButton(
-                        onPressed: bt.isConnected ? () => _send(bt) : null,
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: AppColors.primaryOrange,
-                          foregroundColor: Colors.white,
-                          padding: const EdgeInsets.symmetric(
-                              horizontal: 16, vertical: 13),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(10),
-                          ),
-                        ),
-                        child: const Row(
-                          children: [
-                            Text('Send',
-                                style: TextStyle(fontWeight: FontWeight.w600)),
-                            SizedBox(width: 4),
-                            Icon(Icons.send_rounded, size: 14),
-                          ],
-                        ),
+                      CustomBtn(
+                        onTap: bt.isConnected ? () => _send(bt) : null,
+                        text: 'Send',
+                        suffix: const Icon(Icons.send_rounded, size: 14, color: Colors.white),
+                        bgColor: AppColors.primaryOrange,
+                        borderColor: AppColors.primaryOrange,
+                        radius: 10,
+                        height: 48,
+                        padding: const EdgeInsets.symmetric(horizontal: 16),
+                        style: const TextStyle(fontWeight: FontWeight.w600, color: Colors.white),
                       ),
                     ],
                   ),

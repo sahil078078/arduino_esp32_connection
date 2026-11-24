@@ -7,10 +7,7 @@ import '../models/wifi_device_model.dart';
 import '../services/bluetooth_service.dart';
 import '../services/wifi_service.dart';
 
-enum ConnectionMedium {
-  bluetooth,
-  wifi,
-}
+enum ConnectionMedium { bluetooth, wifi }
 
 class BluetoothProvider extends ChangeNotifier {
   final BluetoothService _bluetoothService;
@@ -35,8 +32,8 @@ class BluetoothProvider extends ChangeNotifier {
     BluetoothService? bluetoothService,
     WifiService? wifiService,
     bool autoScan = false,
-  })  : _bluetoothService = bluetoothService ?? DefaultBluetoothService(),
-        _wifiService = wifiService ?? DefaultWifiService() {
+  }) : _bluetoothService = bluetoothService ?? DefaultBluetoothService(),
+       _wifiService = wifiService ?? DefaultWifiService() {
     _initStreams();
     _initChannelStates();
     if (autoScan) {
@@ -101,13 +98,15 @@ class BluetoothProvider extends ChangeNotifier {
       }
       return 'ESP32 WiFi (Disconnected)';
     }
-    if (_bluetoothService.isConnected && _bluetoothService.connectedDevice != null) {
+    if (_bluetoothService.isConnected &&
+        _bluetoothService.connectedDevice != null) {
       return _bluetoothService.connectedDevice!.name;
     }
     return 'Bluetooth (Disconnected)';
   }
 
-  BluetoothDeviceModel? get connectedDevice => _bluetoothService.connectedDevice;
+  BluetoothDeviceModel? get connectedDevice =>
+      _bluetoothService.connectedDevice;
 
   // RGB LED State (Non-Addressable 4-pin RGB LED)
   int _rgbRed = 0;
@@ -308,7 +307,8 @@ class BluetoothProvider extends ChangeNotifier {
     _initChannelStates();
     _messages.add(
       BluetoothMessage(
-        content: 'Active board switched to ${_selectedBoard.name}. Default GPIO pins updated.',
+        content:
+            'Active board switched to ${_selectedBoard.name}. Default GPIO pins updated.',
         isTx: false,
       ),
     );
@@ -493,15 +493,18 @@ class BluetoothProvider extends ChangeNotifier {
       charToSend = newState ? 'A' : 'a';
       pin = _pinConfig.relay1Pin;
       relayNum = 1;
-    } else if (channelName.contains('Relay 2') || channelName.contains('LED 2')) {
+    } else if (channelName.contains('Relay 2') ||
+        channelName.contains('LED 2')) {
       charToSend = newState ? 'B' : 'b';
       pin = _pinConfig.relay2Pin;
       relayNum = 2;
-    } else if (channelName.contains('Relay 3') || channelName.contains('LED 3')) {
+    } else if (channelName.contains('Relay 3') ||
+        channelName.contains('LED 3')) {
       charToSend = newState ? 'C' : 'c';
       pin = _pinConfig.relay3Pin;
       relayNum = 3;
-    } else if (channelName.contains('Relay 4') || channelName.contains('Relay')) {
+    } else if (channelName.contains('Relay 4') ||
+        channelName.contains('Relay')) {
       charToSend = newState ? 'D' : 'd';
       pin = _pinConfig.relay4Pin;
       relayNum = 4;
@@ -511,14 +514,26 @@ class BluetoothProvider extends ChangeNotifier {
       if (charToSend.isNotEmpty) {
         await _bluetoothService.sendChar(charToSend);
       }
-      await _bluetoothService.sendText('R$relayNum:${newState ? 1 : 0}', newline: '\n');
-      await _bluetoothService.sendText('RELAY:$pin:${newState ? 1 : 0}', newline: '\n');
+      await _bluetoothService.sendText(
+        'R$relayNum:${newState ? 1 : 0}',
+        newline: '\n',
+      );
+      await _bluetoothService.sendText(
+        'RELAY:$pin:${newState ? 1 : 0}',
+        newline: '\n',
+      );
     } else {
       if (charToSend.isNotEmpty) {
         await _wifiService.sendChar(charToSend);
       }
-      await _wifiService.sendText('R$relayNum:${newState ? 1 : 0}', newline: '\n');
-      await _wifiService.sendText('RELAY:$pin:${newState ? 1 : 0}', newline: '\n');
+      await _wifiService.sendText(
+        'R$relayNum:${newState ? 1 : 0}',
+        newline: '\n',
+      );
+      await _wifiService.sendText(
+        'RELAY:$pin:${newState ? 1 : 0}',
+        newline: '\n',
+      );
     }
 
     notifyListeners();
@@ -560,7 +575,10 @@ class BluetoothProvider extends ChangeNotifier {
     notifyListeners();
     if (isConnected) {
       if (_connectionMedium == ConnectionMedium.bluetooth) {
-        await _bluetoothService.sendText('DAC:$_dacPin:$clamped', newline: '\n');
+        await _bluetoothService.sendText(
+          'DAC:$_dacPin:$clamped',
+          newline: '\n',
+        );
       } else {
         await _wifiService.sendDac(_dacPin, clamped);
       }
@@ -601,9 +619,15 @@ class BluetoothProvider extends ChangeNotifier {
   Future<bool> sendCustomText(String text) async {
     if (text.trim().isEmpty) return false;
     if (_connectionMedium == ConnectionMedium.bluetooth) {
-      return await _bluetoothService.sendText(text.trim(), newline: _selectedLineEnding);
+      return await _bluetoothService.sendText(
+        text.trim(),
+        newline: _selectedLineEnding,
+      );
     } else {
-      return await _wifiService.sendText(text.trim(), newline: _selectedLineEnding);
+      return await _wifiService.sendText(
+        text.trim(),
+        newline: _selectedLineEnding,
+      );
     }
   }
 
@@ -700,13 +724,17 @@ class BluetoothProvider extends ChangeNotifier {
       }
     }
     // "all on"
-    else if (lower == 'all on' || lower == 'allon' || lower.contains('all on')) {
+    else if (lower == 'all on' ||
+        lower == 'allon' ||
+        lower.contains('all on')) {
       _isBuiltinLedOn = true;
       _channelStates.updateAll((key, val) => true);
       cmdToSend = 'ALL_ON';
     }
     // "all off"
-    else if (lower == 'all off' || lower == 'alloff' || lower.contains('all off')) {
+    else if (lower == 'all off' ||
+        lower == 'alloff' ||
+        lower.contains('all off')) {
       _isBuiltinLedOn = false;
       _channelStates.updateAll((key, val) => false);
       cmdToSend = 'ALL_OFF';
@@ -732,12 +760,7 @@ class BluetoothProvider extends ChangeNotifier {
   // Terminal Logs
   void clearLogs() {
     _messages.clear();
-    _messages.add(
-      BluetoothMessage(
-        content: 'Console cleared.',
-        isTx: false,
-      ),
-    );
+    _messages.add(BluetoothMessage(content: 'Console cleared.', isTx: false));
     notifyListeners();
   }
 

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../models/bluetooth_device_model.dart';
+import '../src/commons/btn/custom_btn.dart';
 import '../theme/app_colors.dart';
 
 class PinDialog extends StatefulWidget {
@@ -116,22 +117,28 @@ class _PinDialogState extends State<PinDialog> {
         ],
       ),
       actions: [
-        TextButton(
-          onPressed: () => Navigator.of(context).pop(),
-          child: const Text('Cancel', style: TextStyle(color: AppColors.secondaryText)),
+        CustomBtn(
+          onTap: () => Navigator.of(context).pop(),
+          text: 'Cancel',
+          bgColor: Colors.transparent,
+          borderColor: Colors.transparent,
+          height: 36,
+          padding: const EdgeInsets.symmetric(horizontal: 14),
+          style: const TextStyle(color: AppColors.secondaryText, fontSize: 13, fontWeight: FontWeight.w600),
         ),
-        ElevatedButton(
-          onPressed: () {
+        CustomBtn(
+          onTap: () {
             final pin = _pinController.text.trim();
             Navigator.of(context).pop();
             widget.onConnect(pin.isEmpty ? '1234' : pin);
           },
-          style: ElevatedButton.styleFrom(
-            backgroundColor: AppColors.primaryOrange,
-            foregroundColor: Colors.white,
-            padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 10),
-          ),
-          child: const Text('Pair & Connect'),
+          text: 'Pair & Connect',
+          bgColor: AppColors.primaryOrange,
+          borderColor: AppColors.primaryOrange,
+          radius: 10,
+          height: 38,
+          padding: const EdgeInsets.symmetric(horizontal: 18),
+          style: const TextStyle(color: Colors.white, fontSize: 13, fontWeight: FontWeight.w600),
         ),
       ],
     );

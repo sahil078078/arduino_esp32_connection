@@ -5,7 +5,6 @@ import 'package:arduino_control_app/screens/splash_screen.dart';
 import 'package:arduino_control_app/widgets/led_control_card.dart';
 import 'package:arduino_control_app/widgets/pwm_control_card.dart';
 import 'package:arduino_control_app/widgets/rgb_led_control_card.dart';
-import 'package:arduino_control_app/widgets/sensors_dac_card.dart';
 import 'package:arduino_control_app/widgets/voice_control_card.dart';
 
 void main() {

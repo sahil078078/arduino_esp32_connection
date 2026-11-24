@@ -49,20 +49,23 @@ class CustomBtn extends StatelessWidget {
             borderRadius: BorderRadius.circular(radius),
             side: BorderSide(color: borderColor ?? Constants.instance.primary, width: borderWidth),
           ),
-          backgroundColor: bgColor,
-          disabledBackgroundColor: bgColor,
+          backgroundColor: bgColor ?? Constants.instance.primary,
+          disabledBackgroundColor: (bgColor ?? Constants.instance.primary).withAlpha(128),
+          foregroundColor: Colors.white,
+          elevation: 0,
         ),
         child: isLoading
-            ? CustomLoadingIndicator(color: loadingIndicatorColor ?? Constants.instance.black)
+            ? CustomLoadingIndicator(color: loadingIndicatorColor ?? Constants.instance.white)
             : Row(
                 mainAxisSize: MainAxisSize.min,
+                mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   if (prefix != null) ...[prefix!, Constants.instance.square.copyWith(height: 0, width: prefixDistance)],
                   Flexible(
                     child: child ??
                         Text(
                           text ?? "Save",
-                          style: style ?? AppTextStyle.bold.copyWith(fontSize: 14.5, color: Constants.instance.black),
+                          style: style ?? AppTextStyle.bold.copyWith(fontSize: 14, color: Constants.instance.white),
                         ),
                   ),
                   if (suffix != null) ...[Constants.instance.square.copyWith(height: 0, width: suffixDistance), suffix!],

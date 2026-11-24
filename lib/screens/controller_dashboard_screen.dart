@@ -289,6 +289,7 @@ class ControllerDashboardScreen extends StatelessWidget {
                 isCommonAnode: bt.isCommonAnode,
                 isRgbBuiltin: bt.isRgbBuiltin,
                 boardHasBuiltinRgb: bt.selectedBoard.builtinRgbPin != null,
+                board: bt.selectedBoard,
                 onTogglePower: (on) => bt.toggleRgbPower(on),
                 onColorChanged: (r, g, b) => bt.setRgbColor(r, g, b),
                 onConfigChanged: ({rPin, gPin, bPin, isCommonAnode, isRgbBuiltin}) {

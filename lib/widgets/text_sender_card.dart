@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import '../src/commons/btn/custom_btn.dart';
+import '../src/commons/custom_drop_down_btn.dart';
 import '../theme/app_colors.dart';
 
 class TextSenderCard extends StatefulWidget {
@@ -101,40 +103,36 @@ class _TextSenderCardState extends State<TextSenderCard> {
               ),
               const SizedBox(width: 8),
               // Line Ending Selector
-              Container(
-                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
-                decoration: BoxDecoration(
+              CustomDropdownBtn<String>(
+                value: widget.selectedLineEnding == '\r\n'
+                    ? r'\r\n (CRLF)'
+                    : widget.selectedLineEnding.isEmpty
+                        ? 'None'
+                        : r'\n (LF)',
+                btnDecoration: BoxDecoration(
                   color: AppColors.surfaceMuted,
                   borderRadius: BorderRadius.circular(8),
                   border: Border.all(color: AppColors.border, width: 1),
                 ),
-                child: DropdownButtonHideUnderline(
-                  child: DropdownButton<String>(
-                    value: widget.selectedLineEnding == '\r\n'
-                        ? '\\r\\n (CRLF)'
-                        : widget.selectedLineEnding.isEmpty
-                            ? 'None'
-                            : '\\n (LF)',
-                    icon: const Icon(Icons.arrow_drop_down,
-                        color: AppColors.secondaryText, size: 18),
-                    items: widget.lineEndingOptions.map((opt) {
-                      return DropdownMenuItem<String>(
-                        value: opt,
-                        child: Text(
-                          opt,
-                          style: const TextStyle(
-                            fontSize: 11,
-                            fontWeight: FontWeight.w600,
-                            color: AppColors.primaryText,
-                          ),
-                        ),
-                      );
-                    }).toList(),
-                    onChanged: (val) {
-                      if (val != null) widget.onLineEndingChanged(val);
-                    },
-                  ),
-                ),
+                contentPadding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                icon: const Icon(Icons.arrow_drop_down,
+                    color: AppColors.secondaryText, size: 18),
+                items: widget.lineEndingOptions.map((opt) {
+                  return DropdownMenuItem<String>(
+                    value: opt,
+                    child: Text(
+                      opt,
+                      style: const TextStyle(
+                        fontSize: 11,
+                        fontWeight: FontWeight.w600,
+                        color: AppColors.primaryText,
+                      ),
+                    ),
+                  );
+                }).toList(),
+                onChanged: (val) {
+                  if (val != null) widget.onLineEndingChanged(val);
+                },
               ),
             ],
           ),
@@ -175,24 +173,16 @@ class _TextSenderCardState extends State<TextSenderCard> {
                 ),
               ),
               const SizedBox(width: 8),
-              ElevatedButton(
-                onPressed: widget.isConnected ? _submit : null,
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: AppColors.primaryOrange,
-                  foregroundColor: Colors.white,
-                  padding: const EdgeInsets.symmetric(
-                      horizontal: 16, vertical: 13),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(10),
-                  ),
-                ),
-                child: const Row(
-                  children: [
-                    Text('Send', style: TextStyle(fontWeight: FontWeight.w600)),
-                    SizedBox(width: 4),
-                    Icon(Icons.send_rounded, size: 15),
-                  ],
-                ),
+              CustomBtn(
+                onTap: widget.isConnected ? _submit : null,
+                text: 'Send',
+                suffix: const Icon(Icons.send_rounded, size: 15, color: Colors.white),
+                bgColor: AppColors.primaryOrange,
+                borderColor: AppColors.primaryOrange,
+                radius: 10,
+                height: 48,
+                padding: const EdgeInsets.symmetric(horizontal: 16),
+                style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w600, color: Colors.white),
               ),
             ],
           ),

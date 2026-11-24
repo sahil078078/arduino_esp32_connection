@@ -79,7 +79,9 @@ class _MainScreenState extends State<MainScreen> {
                 children: [
                   Container(
                     padding: const EdgeInsets.symmetric(
-                        horizontal: 18, vertical: 22),
+                      horizontal: 18,
+                      vertical: 22,
+                    ),
                     child: Row(
                       children: [
                         Container(
@@ -127,7 +129,9 @@ class _MainScreenState extends State<MainScreen> {
                   Expanded(
                     child: ListView.builder(
                       padding: const EdgeInsets.symmetric(
-                          horizontal: 10, vertical: 6),
+                        horizontal: 10,
+                        vertical: 6,
+                      ),
                       itemCount: navItems.length,
                       itemBuilder: (context, index) {
                         final item = navItems[index];
@@ -140,7 +144,9 @@ class _MainScreenState extends State<MainScreen> {
                             borderRadius: BorderRadius.circular(10),
                             child: Container(
                               padding: const EdgeInsets.symmetric(
-                                  horizontal: 12, vertical: 12),
+                                horizontal: 12,
+                                vertical: 12,
+                              ),
                               decoration: BoxDecoration(
                                 color: isSelected
                                     ? AppColors.lightOrange
@@ -181,10 +187,7 @@ class _MainScreenState extends State<MainScreen> {
               ),
             ),
             Expanded(
-              child: IndexedStack(
-                index: _currentIndex,
-                children: screens,
-              ),
+              child: IndexedStack(index: _currentIndex, children: screens),
             ),
           ],
         ),
@@ -193,16 +196,11 @@ class _MainScreenState extends State<MainScreen> {
 
     // Mobile Layout: Clean Bottom Navigation Bar
     return Scaffold(
-      body: IndexedStack(
-        index: _currentIndex,
-        children: screens,
-      ),
+      body: IndexedStack(index: _currentIndex, children: screens),
       bottomNavigationBar: Container(
         decoration: const BoxDecoration(
           color: AppColors.cardBackground,
-          border: Border(
-            top: BorderSide(color: AppColors.border, width: 1),
-          ),
+          border: Border(top: BorderSide(color: AppColors.border, width: 1)),
         ),
         child: BottomNavigationBar(
           currentIndex: _currentIndex,

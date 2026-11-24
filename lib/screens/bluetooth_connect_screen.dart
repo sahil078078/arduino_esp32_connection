@@ -3,7 +3,10 @@ import 'package:provider/provider.dart';
 import '../models/bluetooth_device_model.dart';
 import '../models/wifi_device_model.dart';
 import '../providers/bluetooth_provider.dart';
+import '../src/commons/btn/custom_btn.dart';
+import '../src/commons/custom_form_field.dart';
 import '../src/helper/app_toasting.dart';
+import '../src/helper/app_validator.dart';
 import '../theme/app_colors.dart';
 import '../widgets/pin_dialog.dart';
 import '../widgets/status_badge.dart';
@@ -18,10 +21,12 @@ class BluetoothConnectScreen extends StatefulWidget {
 }
 
 class _BluetoothConnectScreenState extends State<BluetoothConnectScreen> {
-  final TextEditingController _ipController =
-      TextEditingController(text: '192.168.4.1');
-  final TextEditingController _portController =
-      TextEditingController(text: '80');
+  final TextEditingController _ipController = TextEditingController(
+    text: '192.168.4.1',
+  );
+  final TextEditingController _portController = TextEditingController(
+    text: '80',
+  );
 
   WifiMode _wifiMode = WifiMode.softAp;
   WifiProtocol _wifiProtocol = WifiProtocol.http;
@@ -51,8 +56,12 @@ class _BluetoothConnectScreenState extends State<BluetoothConnectScreen> {
   Future<void> _handleTestPing(BluetoothProvider bt) async {
     final ip = _ipController.text.trim();
     final port = int.tryParse(_portController.text.trim()) ?? 80;
-    if (ip.isEmpty) {
-      AppToasting.showErrorToast('Please enter ESP32 IP address');
+    final validation = AppValidator.notEmptyValidator(
+      ip,
+      'Please enter ESP32 IP address',
+    );
+    if (validation != null) {
+      AppToasting.showErrorToast(validation);
       return;
     }
 
@@ -77,8 +86,12 @@ class _BluetoothConnectScreenState extends State<BluetoothConnectScreen> {
   Future<void> _handleWifiConnect(BluetoothProvider bt) async {
     final ip = _ipController.text.trim();
     final port = int.tryParse(_portController.text.trim()) ?? 80;
-    if (ip.isEmpty) {
-      AppToasting.showErrorToast('Please enter ESP32 IP address');
+    final validation = AppValidator.notEmptyValidator(
+      ip,
+      'Please enter ESP32 IP address',
+    );
+    if (validation != null) {
+      AppToasting.showErrorToast(validation);
       return;
     }
 
@@ -319,12 +332,16 @@ class _BluetoothConnectScreenState extends State<BluetoothConnectScreen> {
                         backgroundColor: const Color(0xFFEF4444),
                         foregroundColor: Colors.white,
                         padding: const EdgeInsets.symmetric(
-                            horizontal: 12, vertical: 8),
+                          horizontal: 12,
+                          vertical: 8,
+                        ),
                         minimumSize: Size.zero,
                         tapTargetSize: MaterialTapTargetSize.shrinkWrap,
                       ),
-                      child: const Text('Disconnect',
-                          style: TextStyle(fontSize: 12)),
+                      child: const Text(
+                        'Disconnect',
+                        style: TextStyle(fontSize: 12),
+                      ),
                     ),
                   ],
                 ),
@@ -436,81 +453,44 @@ class _BluetoothConnectScreenState extends State<BluetoothConnectScreen> {
 
               const SizedBox(height: 14),
 
-              // IP Address Input Field
+              // IP Address & Port Input Fields
               Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Expanded(
                     flex: 3,
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        const Text(
-                          'ESP32 IP Address',
-                          style: TextStyle(
-                            fontSize: 12,
-                            fontWeight: FontWeight.w700,
-                            color: AppColors.primaryText,
-                          ),
-                        ),
-                        const SizedBox(height: 6),
-                        TextField(
-                          controller: _ipController,
-                          keyboardType: TextInputType.url,
-                          decoration: InputDecoration(
-                            hintText: '192.168.4.1',
-                            prefixIcon: const Icon(Icons.lan_rounded, size: 18),
-                            contentPadding: const EdgeInsets.symmetric(
-                                horizontal: 12, vertical: 10),
-                            border: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(10),
-                              borderSide:
-                                  const BorderSide(color: AppColors.border),
-                            ),
-                            focusedBorder: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(10),
-                              borderSide: const BorderSide(
-                                  color: AppColors.primaryOrange, width: 1.5),
-                            ),
-                          ),
-                        ),
-                      ],
+                    child: CustomFormField(
+                      label: 'ESP32 IP Address',
+                      controller: _ipController,
+                      keyboardType: TextInputType.url,
+                      hintText: '192.168.4.1',
+                      prefix: const Icon(
+                        Icons.lan_rounded,
+                        size: 18,
+                        color: AppColors.primaryOrange,
+                      ),
+                      fillColor: AppColors.cardBackground,
+                      borderColor: AppColors.border,
+                      contentPadding: const EdgeInsets.symmetric(
+                        horizontal: 12,
+                        vertical: 10,
+                      ),
                     ),
                   ),
                   const SizedBox(width: 10),
                   Expanded(
                     flex: 1,
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        const Text(
-                          'Port',
-                          style: TextStyle(
-                            fontSize: 12,
-                            fontWeight: FontWeight.w700,
-                            color: AppColors.primaryText,
-                          ),
-                        ),
-                        const SizedBox(height: 6),
-                        TextField(
-                          controller: _portController,
-                          keyboardType: TextInputType.number,
-                          decoration: InputDecoration(
-                            hintText: '80',
-                            contentPadding: const EdgeInsets.symmetric(
-                                horizontal: 10, vertical: 10),
-                            border: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(10),
-                              borderSide:
-                                  const BorderSide(color: AppColors.border),
-                            ),
-                            focusedBorder: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(10),
-                              borderSide: const BorderSide(
-                                  color: AppColors.primaryOrange, width: 1.5),
-                            ),
-                          ),
-                        ),
-                      ],
+                    child: CustomFormField(
+                      label: 'Port',
+                      controller: _portController,
+                      keyboardType: TextInputType.number,
+                      hintText: '80',
+                      fillColor: AppColors.cardBackground,
+                      borderColor: AppColors.border,
+                      contentPadding: const EdgeInsets.symmetric(
+                        horizontal: 10,
+                        vertical: 10,
+                      ),
                     ),
                   ),
                 ],
@@ -557,9 +537,10 @@ class _BluetoothConnectScreenState extends State<BluetoothConnectScreen> {
               // Protocol Selector
               Row(
                 children: [
-                  const Text('Protocol: ',
-                      style:
-                          TextStyle(fontSize: 12, fontWeight: FontWeight.w700)),
+                  const Text(
+                    'Protocol: ',
+                    style: TextStyle(fontSize: 12, fontWeight: FontWeight.w700),
+                  ),
                   ChoiceChip(
                     label: const Text('HTTP WebServer'),
                     selected: _wifiProtocol == WifiProtocol.http,
@@ -613,62 +594,52 @@ class _BluetoothConnectScreenState extends State<BluetoothConnectScreen> {
               // Action Buttons: Test Ping & Connect Button
               Row(
                 children: [
-                  OutlinedButton.icon(
-                    onPressed: _isPinging ? null : () => _handleTestPing(bt),
-                    style: OutlinedButton.styleFrom(
-                      foregroundColor: AppColors.primaryOrange,
-                      side: const BorderSide(color: AppColors.primaryOrange),
-                      padding: const EdgeInsets.symmetric(
-                          horizontal: 14, vertical: 12),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(10),
-                      ),
+                  CustomBtn(
+                    onTap: _isPinging ? null : () => _handleTestPing(bt),
+                    isLoading: _isPinging,
+                    text: _pingResult != null ? '$_pingResult ms' : 'Test Ping',
+                    prefix: const Icon(
+                      Icons.network_check_rounded,
+                      size: 17,
+                      color: AppColors.primaryOrange,
                     ),
-                    icon: _isPinging
-                        ? const SizedBox(
-                            width: 14,
-                            height: 14,
-                            child: CircularProgressIndicator(
-                                strokeWidth: 2, color: AppColors.primaryOrange),
-                          )
-                        : const Icon(Icons.network_check_rounded, size: 18),
-                    label: Text(
-                      _pingResult != null
-                          ? '$_pingResult ms'
-                          : 'Test Ping',
-                      style: const TextStyle(fontSize: 12),
+                    bgColor: Colors.transparent,
+                    borderColor: AppColors.primaryOrange,
+                    borderWidth: 1.2,
+                    radius: 10,
+                    height: 44,
+                    padding: const EdgeInsets.symmetric(horizontal: 14),
+                    style: const TextStyle(
+                      fontSize: 12,
+                      fontWeight: FontWeight.w700,
+                      color: AppColors.primaryOrange,
                     ),
                   ),
                   const SizedBox(width: 10),
                   Expanded(
-                    child: ElevatedButton.icon(
-                      onPressed: bt.isWifiConnecting
+                    child: CustomBtn(
+                      onTap: bt.isWifiConnecting
                           ? null
                           : () => _handleWifiConnect(bt),
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: AppColors.primaryOrange,
-                        foregroundColor: Colors.white,
-                        padding: const EdgeInsets.symmetric(vertical: 12),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(10),
-                        ),
-                      ),
-                      icon: bt.isWifiConnecting
-                          ? const SizedBox(
-                              width: 16,
-                              height: 16,
-                              child: CircularProgressIndicator(
-                                  strokeWidth: 2, color: Colors.white),
-                            )
-                          : const Icon(Icons.wifi_rounded, size: 18),
-                      label: Text(
-                        bt.isWifiConnecting
-                            ? 'Connecting...'
-                            : (bt.isWifiConnected
+                      isLoading: bt.isWifiConnecting,
+                      text: bt.isWifiConnecting
+                          ? 'Connecting...'
+                          : (bt.isWifiConnected
                                 ? 'Reconnect WiFi'
                                 : 'Connect via WiFi'),
-                        style: const TextStyle(
-                            fontSize: 13, fontWeight: FontWeight.w700),
+                      prefix: const Icon(
+                        Icons.wifi_rounded,
+                        size: 18,
+                        color: Colors.white,
+                      ),
+                      bgColor: AppColors.primaryOrange,
+                      borderColor: AppColors.primaryOrange,
+                      radius: 10,
+                      height: 44,
+                      style: const TextStyle(
+                        fontSize: 13,
+                        fontWeight: FontWeight.w700,
+                        color: Colors.white,
                       ),
                     ),
                   ),
@@ -693,8 +664,11 @@ class _BluetoothConnectScreenState extends State<BluetoothConnectScreen> {
             children: [
               const Row(
                 children: [
-                  Icon(Icons.help_outline_rounded,
-                      color: AppColors.primaryOrange, size: 18),
+                  Icon(
+                    Icons.help_outline_rounded,
+                    color: AppColors.primaryOrange,
+                    size: 18,
+                  ),
                   SizedBox(width: 8),
                   Text(
                     'How to Connect ESP32 via WiFi',
@@ -707,14 +681,22 @@ class _BluetoothConnectScreenState extends State<BluetoothConnectScreen> {
                 ],
               ),
               const SizedBox(height: 10),
-              _buildGuideStep('1',
-                  'Go to the "Code" tab and select the "ESP32 WiFi" sketch.'),
-              _buildGuideStep('2',
-                  'Upload the sketch to your ESP32 board using Arduino IDE.'),
-              _buildGuideStep('3',
-                  'On your phone, open Settings > WiFi and connect to "ESP32_Controller_AP" (Password: 12345678).'),
-              _buildGuideStep('4',
-                  'Return here and tap "Connect via WiFi" (Default IP 192.168.4.1).'),
+              _buildGuideStep(
+                '1',
+                'Go to the "Code" tab and select the "ESP32 WiFi" sketch.',
+              ),
+              _buildGuideStep(
+                '2',
+                'Upload the sketch to your ESP32 board using Arduino IDE.',
+              ),
+              _buildGuideStep(
+                '3',
+                'On your phone, open Settings > WiFi and connect to "ESP32_Controller_AP" (Password: 12345678).',
+              ),
+              _buildGuideStep(
+                '4',
+                'Return here and tap "Connect via WiFi" (Default IP 192.168.4.1).',
+              ),
             ],
           ),
         ),
@@ -834,8 +816,10 @@ class _BluetoothConnectScreenState extends State<BluetoothConnectScreen> {
                   style: ElevatedButton.styleFrom(
                     backgroundColor: const Color(0xFFDC2626),
                     foregroundColor: Colors.white,
-                    padding:
-                        const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 12,
+                      vertical: 8,
+                    ),
                     minimumSize: Size.zero,
                   ),
                   child: const Text('Turn ON', style: TextStyle(fontSize: 12)),
@@ -871,30 +855,24 @@ class _BluetoothConnectScreenState extends State<BluetoothConnectScreen> {
                 ),
               ],
             ),
-            ElevatedButton.icon(
-              onPressed: bt.isScanning ? null : () => bt.scanDevices(),
-              style: ElevatedButton.styleFrom(
-                backgroundColor: AppColors.primaryOrange,
-                foregroundColor: Colors.white,
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(10),
-                ),
+            CustomBtn(
+              onTap: bt.isScanning ? null : () => bt.scanDevices(),
+              isLoading: bt.isScanning,
+              text: bt.isScanning ? 'Scanning...' : 'Scan',
+              prefix: const Icon(
+                Icons.refresh_rounded,
+                size: 18,
+                color: Colors.white,
               ),
-              icon: bt.isScanning
-                  ? const SizedBox(
-                      width: 14,
-                      height: 14,
-                      child: CircularProgressIndicator(
-                        strokeWidth: 2,
-                        color: Colors.white,
-                      ),
-                    )
-                  : const Icon(Icons.refresh_rounded, size: 18),
-              label: Text(
-                bt.isScanning ? 'Scanning...' : 'Scan',
-                style: const TextStyle(fontSize: 13),
+              bgColor: AppColors.primaryOrange,
+              borderColor: AppColors.primaryOrange,
+              radius: 10,
+              height: 38,
+              padding: const EdgeInsets.symmetric(horizontal: 14),
+              style: const TextStyle(
+                fontSize: 13,
+                fontWeight: FontWeight.w600,
+                color: Colors.white,
               ),
             ),
           ],
@@ -986,7 +964,10 @@ class _BluetoothConnectScreenState extends State<BluetoothConnectScreen> {
   }
 
   Widget _buildConnectedCard(
-      BuildContext context, BluetoothProvider bt, BluetoothDeviceModel device) {
+    BuildContext context,
+    BluetoothProvider bt,
+    BluetoothDeviceModel device,
+  ) {
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
@@ -1037,16 +1018,19 @@ class _BluetoothConnectScreenState extends State<BluetoothConnectScreen> {
               ),
             ],
           ),
-          ElevatedButton(
-            onPressed: () => bt.disconnect(),
-            style: ElevatedButton.styleFrom(
-              backgroundColor: const Color(0xFFEF4444),
-              foregroundColor: Colors.white,
-              padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
-              minimumSize: Size.zero,
-              tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+          CustomBtn(
+            onTap: () => bt.disconnectDevice(),
+            text: 'Disconnect',
+            bgColor: const Color(0xFFEF4444),
+            borderColor: const Color(0xFFEF4444),
+            radius: 8,
+            height: 34,
+            padding: const EdgeInsets.symmetric(horizontal: 14),
+            style: const TextStyle(
+              fontSize: 12,
+              fontWeight: FontWeight.w600,
+              color: Colors.white,
             ),
-            child: const Text('Disconnect', style: TextStyle(fontSize: 12)),
           ),
         ],
       ),
@@ -1054,7 +1038,10 @@ class _BluetoothConnectScreenState extends State<BluetoothConnectScreen> {
   }
 
   Widget _buildDeviceCard(
-      BuildContext context, BluetoothProvider bt, BluetoothDeviceModel device) {
+    BuildContext context,
+    BluetoothProvider bt,
+    BluetoothDeviceModel device,
+  ) {
     final isThisConnected =
         bt.isConnected && bt.connectedDevice?.address == device.address;
 
@@ -1065,9 +1052,7 @@ class _BluetoothConnectScreenState extends State<BluetoothConnectScreen> {
         color: AppColors.cardBackground,
         borderRadius: BorderRadius.circular(12),
         border: Border.all(
-          color: isThisConnected
-              ? AppColors.primaryOrange
-              : AppColors.border,
+          color: isThisConnected ? AppColors.primaryOrange : AppColors.border,
           width: 1,
         ),
       ),
@@ -1132,8 +1117,8 @@ class _BluetoothConnectScreenState extends State<BluetoothConnectScreen> {
               ),
             )
           else
-            ElevatedButton(
-              onPressed: bt.isConnecting
+            CustomBtn(
+              onTap: bt.isConnecting
                   ? null
                   : () {
                       if (!device.isPaired && device.requiresPin) {
@@ -1150,15 +1135,17 @@ class _BluetoothConnectScreenState extends State<BluetoothConnectScreen> {
                         bt.connectDevice(device);
                       }
                     },
-              style: ElevatedButton.styleFrom(
-                backgroundColor: AppColors.primaryOrange,
-                foregroundColor: Colors.white,
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
-                minimumSize: Size.zero,
-                tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+              text: 'Connect',
+              bgColor: AppColors.primaryOrange,
+              borderColor: AppColors.primaryOrange,
+              radius: 8,
+              height: 34,
+              padding: const EdgeInsets.symmetric(horizontal: 14),
+              style: const TextStyle(
+                fontSize: 12,
+                fontWeight: FontWeight.w600,
+                color: Colors.white,
               ),
-              child: const Text('Connect', style: TextStyle(fontSize: 12)),
             ),
         ],
       ),

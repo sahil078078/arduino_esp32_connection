@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../models/board_model.dart';
 import '../providers/bluetooth_provider.dart';
+import '../src/commons/btn/custom_close_btn.dart';
 import '../theme/app_colors.dart';
 
 class BoardSelectionDialog extends StatelessWidget {
@@ -68,11 +69,7 @@ class BoardSelectionDialog extends StatelessWidget {
                   ),
                 ],
               ),
-              IconButton(
-                icon: const Icon(Icons.close_rounded, size: 20),
-                onPressed: () => Navigator.of(context).pop(),
-                color: AppColors.secondaryText,
-              ),
+              const CustomCloseBtn(size: 28),
             ],
           ),
           const Text(

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../src/commons/btn/custom_btn.dart';
 import '../theme/app_colors.dart';
 
 class VoiceControlCard extends StatelessWidget {
@@ -286,24 +287,20 @@ class VoiceControlCard extends StatelessWidget {
                 // 100% Accurate Google Voice AI Button
                 if (onOpenGoogleVoice != null) ...[
                   const SizedBox(height: 12),
-                  OutlinedButton.icon(
-                    onPressed: isConnected ? onOpenGoogleVoice : null,
-                    style: OutlinedButton.styleFrom(
-                      foregroundColor: AppColors.primaryOrange,
-                      side: const BorderSide(color: AppColors.primaryOrange, width: 1.2),
-                      backgroundColor: AppColors.cardBackground,
-                      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(10),
-                      ),
-                    ),
-                    icon: const Icon(Icons.mic, size: 16, color: AppColors.primaryOrange),
-                    label: const Text(
-                      'Google Voice Input (100% Accurate AI)',
-                      style: TextStyle(
-                        fontSize: 12,
-                        fontWeight: FontWeight.w700,
-                      ),
+                  CustomBtn(
+                    onTap: isConnected ? onOpenGoogleVoice : null,
+                    text: 'Google Voice Input (100% Accurate AI)',
+                    prefix: const Icon(Icons.mic, size: 16, color: AppColors.primaryOrange),
+                    bgColor: AppColors.cardBackground,
+                    borderColor: AppColors.primaryOrange,
+                    borderWidth: 1.2,
+                    radius: 10,
+                    height: 40,
+                    padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
+                    style: const TextStyle(
+                      fontSize: 12,
+                      fontWeight: FontWeight.w700,
+                      color: AppColors.primaryOrange,
                     ),
                   ),
                 ],

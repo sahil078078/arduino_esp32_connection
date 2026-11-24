@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../providers/bluetooth_provider.dart';
+import '../src/commons/btn/custom_close_btn.dart';
 import '../theme/app_colors.dart';
 
 class BoardPinoutSheet extends StatelessWidget {
@@ -70,11 +71,7 @@ class BoardPinoutSheet extends StatelessWidget {
                   ),
                 ],
               ),
-              IconButton(
-                icon: const Icon(Icons.close_rounded, size: 20),
-                onPressed: () => Navigator.of(context).pop(),
-                color: AppColors.secondaryText,
-              ),
+              const CustomCloseBtn(size: 28),
             ],
           ),
           Text(

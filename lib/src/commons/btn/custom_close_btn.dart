@@ -9,22 +9,28 @@ class CustomCloseBtn extends StatelessWidget {
     this.onClose,
     this.bgColor,
     this.size,
+    this.iconColor,
   });
   final GestureTapCallback? onClose;
   final Color? bgColor;
   final double? size;
+  final Color? iconColor;
 
   @override
   Widget build(BuildContext context) {
     return CustomIconBtn(
-      onTap: onClose, // ?? () => backScreen(),
-      // svgPath: Graphics.instance.crossMark,
+      onTap: onClose ?? () => Navigator.of(context).pop(),
+      svg: Icon(
+        Icons.close_rounded,
+        size: (size ?? 30) * 0.55,
+        color: iconColor ?? Constants.instance.grey700,
+      ),
       bgColor: bgColor ?? Constants.instance.grey100,
       height: size ?? 30,
       width: size ?? 30,
       radius: size ?? 30,
       padding: const EdgeInsets.all(5),
-      color: Constants.instance.black,
+      color: iconColor ?? Constants.instance.black,
     );
   }
 }

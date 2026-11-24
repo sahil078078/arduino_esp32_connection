@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../src/commons/btn/custom_btn.dart';
 import '../theme/app_colors.dart';
 
 class CharSenderCard extends StatefulWidget {
@@ -129,18 +130,15 @@ class _CharSenderCardState extends State<CharSenderCard> {
               ),
               const SizedBox(width: 10),
               Expanded(
-                child: ElevatedButton.icon(
-                  onPressed: widget.isConnected ? _submitCustomChar : null,
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: AppColors.primaryOrange,
-                    foregroundColor: Colors.white,
-                    padding: const EdgeInsets.symmetric(vertical: 12),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(10),
-                    ),
-                  ),
-                  icon: const Icon(Icons.send_rounded, size: 16),
-                  label: const Text('Send Char'),
+                child: CustomBtn(
+                  onTap: widget.isConnected ? _submitCustomChar : null,
+                  text: 'Send Char',
+                  prefix: const Icon(Icons.send_rounded, size: 16, color: Colors.white),
+                  bgColor: AppColors.primaryOrange,
+                  borderColor: AppColors.primaryOrange,
+                  radius: 10,
+                  height: 48,
+                  style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w600, color: Colors.white),
                 ),
               ),
             ],

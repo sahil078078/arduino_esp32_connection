@@ -1,6 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import '../models/board_model.dart';
 import '../providers/bluetooth_provider.dart';
+import '../src/commons/btn/custom_btn.dart';
+import '../src/commons/btn/custom_close_btn.dart';
+import '../src/commons/custom_drop_down_btn.dart';
+import '../src/commons/custom_switch_tile.dart';
 import '../src/helper/app_toasting.dart';
 import '../theme/app_colors.dart';
 
@@ -104,8 +109,11 @@ class _PinConfigurationDialogState extends State<PinConfigurationDialog> {
             children: [
               Row(
                 children: [
-                  const Icon(Icons.tune_rounded,
-                      color: AppColors.primaryOrange, size: 22),
+                  const Icon(
+                    Icons.tune_rounded,
+                    color: AppColors.primaryOrange,
+                    size: 22,
+                  ),
                   const SizedBox(width: 8),
                   Text(
                     'GPIO & Relay Pin Settings',
@@ -117,11 +125,7 @@ class _PinConfigurationDialogState extends State<PinConfigurationDialog> {
                   ),
                 ],
               ),
-              IconButton(
-                icon: const Icon(Icons.close_rounded, size: 20),
-                onPressed: () => Navigator.of(context).pop(),
-                color: AppColors.secondaryText,
-              ),
+              const CustomCloseBtn(size: 28),
             ],
           ),
           Row(
@@ -161,8 +165,10 @@ class _PinConfigurationDialogState extends State<PinConfigurationDialog> {
                 // 1. Builtin LED Pin
                 _buildPinSectionTitle('Built-in LED Pin'),
                 _buildPinSelectorTile(
+                  board: board,
                   label: 'Built-in LED (Status Indicator)',
-                  description: 'Board default is GPIO ${board.defaultBuiltinLedPin}',
+                  description:
+                      'Board default is GPIO ${board.defaultBuiltinLedPin}',
                   currentPin: _builtinLedPin,
                   pins: getDropdownPins(_builtinLedPin),
                   icon: Icons.lightbulb_rounded,
@@ -174,6 +180,7 @@ class _PinConfigurationDialogState extends State<PinConfigurationDialog> {
                 // 2. Relay Pins
                 _buildPinSectionTitle('4-Channel Relay Output Pins'),
                 _buildPinSelectorTile(
+                  board: board,
                   label: 'Relay Channel 1',
                   description: 'Triggered by char "A" / "a" or voice',
                   currentPin: _relay1Pin,
@@ -183,6 +190,7 @@ class _PinConfigurationDialogState extends State<PinConfigurationDialog> {
                 ),
                 const SizedBox(height: 8),
                 _buildPinSelectorTile(
+                  board: board,
                   label: 'Relay Channel 2',
                   description: 'Triggered by char "B" / "b"',
                   currentPin: _relay2Pin,
@@ -192,6 +200,7 @@ class _PinConfigurationDialogState extends State<PinConfigurationDialog> {
                 ),
                 const SizedBox(height: 8),
                 _buildPinSelectorTile(
+                  board: board,
                   label: 'Relay Channel 3',
                   description: 'Triggered by char "C" / "c"',
                   currentPin: _relay3Pin,
@@ -201,6 +210,7 @@ class _PinConfigurationDialogState extends State<PinConfigurationDialog> {
                 ),
                 const SizedBox(height: 8),
                 _buildPinSelectorTile(
+                  board: board,
                   label: 'Relay Channel 4',
                   description: 'Triggered by char "D" / "d"',
                   currentPin: _relay4Pin,
@@ -214,22 +224,28 @@ class _PinConfigurationDialogState extends State<PinConfigurationDialog> {
                 // 3. Default PWM Pin
                 _buildPinSectionTitle('Default PWM Duty Cycle Pin'),
                 _buildPinSelectorTile(
+                  board: board,
                   label: 'Primary PWM Pin',
                   description: 'Used for motor speed / LED dimming',
                   currentPin: _pwmPin,
                   pins: board.pwmPins.contains(_pwmPin)
                       ? board.pwmPins
-                      : (List<int>.from(board.pwmPins)..add(_pwmPin)..sort()),
+                      : (List<int>.from(board.pwmPins)
+                          ..add(_pwmPin)
+                          ..sort()),
                   icon: Icons.tune_rounded,
                   onChanged: (p) => setState(() => _pwmPin = p),
                 ),
                 const SizedBox(height: 16),
 
                 // 4. Non-Addressable RGB LED Pins (4 legs: R, G, B + Common)
-                _buildPinSectionTitle('4-Pin RGB LED Configuration (Non-Addressable)'),
+                _buildPinSectionTitle(
+                  '4-Pin RGB LED Configuration (Non-Addressable)',
+                ),
                 _buildPinSelectorTile(
+                  board: board,
                   label: 'Red Channel (Leg 1)',
-                  description: 'PWM pin for Red diode',
+                  description: 'PWM / GPIO pin for Red diode',
                   currentPin: _rgbRedPin,
                   pins: getDropdownPins(_rgbRedPin),
                   icon: Icons.palette_outlined,
@@ -237,8 +253,9 @@ class _PinConfigurationDialogState extends State<PinConfigurationDialog> {
                 ),
                 const SizedBox(height: 8),
                 _buildPinSelectorTile(
+                  board: board,
                   label: 'Green Channel (Leg 3)',
-                  description: 'PWM pin for Green diode',
+                  description: 'PWM / GPIO pin for Green diode',
                   currentPin: _rgbGreenPin,
                   pins: getDropdownPins(_rgbGreenPin),
                   icon: Icons.palette_outlined,
@@ -246,8 +263,9 @@ class _PinConfigurationDialogState extends State<PinConfigurationDialog> {
                 ),
                 const SizedBox(height: 8),
                 _buildPinSelectorTile(
+                  board: board,
                   label: 'Blue Channel (Leg 4)',
-                  description: 'PWM pin for Blue diode',
+                  description: 'PWM / GPIO pin for Blue diode',
                   currentPin: _rgbBluePin,
                   pins: getDropdownPins(_rgbBluePin),
                   icon: Icons.palette_outlined,
@@ -257,90 +275,44 @@ class _PinConfigurationDialogState extends State<PinConfigurationDialog> {
 
                 // Common Anode vs Common Cathode switch
                 Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 14,
+                    vertical: 10,
+                  ),
                   decoration: BoxDecoration(
                     color: AppColors.appBackground,
                     borderRadius: BorderRadius.circular(12),
                     border: Border.all(color: AppColors.border, width: 1),
                   ),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Expanded(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            const Text(
-                              'Common Leg Polarity',
-                              style: TextStyle(
-                                fontSize: 13,
-                                fontWeight: FontWeight.w600,
-                                color: AppColors.primaryText,
-                              ),
-                            ),
-                            Text(
-                              _isCommonAnode
-                                  ? 'Common Anode (+VCC / Inverted PWM)'
-                                  : 'Common Cathode (GND / Normal PWM)',
-                              style: const TextStyle(
-                                fontSize: 11,
-                                color: AppColors.secondaryText,
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                      Switch(
-                        value: _isCommonAnode,
-                        activeColor: AppColors.primaryOrange,
-                        onChanged: (v) => setState(() => _isCommonAnode = v),
-                      ),
-                    ],
+                  child: CustomSwitchTile(
+                    value: _isCommonAnode,
+                    onChanged: (v) => setState(() => _isCommonAnode = v),
+                    title: 'Common Leg Polarity',
+                    subTitle: _isCommonAnode
+                        ? 'Common Anode (+VCC / Inverted PWM)'
+                        : 'Common Cathode (GND / Normal PWM)',
                   ),
                 ),
 
                 if (board.builtinRgbPin != null) ...[
                   const SizedBox(height: 8),
                   Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 14,
+                      vertical: 10,
+                    ),
                     decoration: BoxDecoration(
                       color: AppColors.appBackground,
                       borderRadius: BorderRadius.circular(12),
                       border: Border.all(color: AppColors.border, width: 1),
                     ),
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        Expanded(
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              const Text(
-                                'Target Hardware LED',
-                                style: TextStyle(
-                                  fontSize: 13,
-                                  fontWeight: FontWeight.w600,
-                                  color: AppColors.primaryText,
-                                ),
-                              ),
-                              Text(
-                                _isRgbBuiltin
-                                    ? 'On-board LED (GPIO ${board.builtinRgbPin})'
-                                    : 'External 4-Pin RGB LED Module',
-                                style: const TextStyle(
-                                  fontSize: 11,
-                                  color: AppColors.secondaryText,
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                        Switch(
-                          value: _isRgbBuiltin,
-                          activeColor: AppColors.primaryOrange,
-                          onChanged: (v) => setState(() => _isRgbBuiltin = v),
-                        ),
-                      ],
+                    child: CustomSwitchTile(
+                      value: _isRgbBuiltin,
+                      onChanged: (v) => setState(() => _isRgbBuiltin = v),
+                      title: 'Target Hardware LED',
+                      subTitle: _isRgbBuiltin
+                          ? 'On-board LED (GPIO ${board.builtinRgbPin})'
+                          : 'External 4-Pin RGB LED Module',
                     ),
                   ),
                 ],
@@ -356,8 +328,8 @@ class _PinConfigurationDialogState extends State<PinConfigurationDialog> {
           // Bottom Action Buttons
           Row(
             children: [
-              OutlinedButton.icon(
-                onPressed: () {
+              CustomBtn(
+                onTap: () {
                   bt.resetPinsToDefault();
                   setState(() {
                     _builtinLedPin = board.defaultBuiltinLedPin;
@@ -374,21 +346,27 @@ class _PinConfigurationDialogState extends State<PinConfigurationDialog> {
                   });
                   AppToasting.showWarningToast('Pins reset to board defaults');
                 },
-                style: OutlinedButton.styleFrom(
-                  foregroundColor: AppColors.secondaryText,
-                  side: const BorderSide(color: AppColors.border),
-                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(10),
-                  ),
+                text: 'Reset',
+                prefix: const Icon(
+                  Icons.restart_alt_rounded,
+                  size: 18,
+                  color: AppColors.secondaryText,
                 ),
-                icon: const Icon(Icons.restart_alt_rounded, size: 18),
-                label: const Text('Reset', style: TextStyle(fontSize: 12)),
+                bgColor: Colors.transparent,
+                borderColor: AppColors.border,
+                borderWidth: 1,
+                radius: 10,
+                height: 44,
+                style: const TextStyle(
+                  fontSize: 12,
+                  fontWeight: FontWeight.w600,
+                  color: AppColors.secondaryText,
+                ),
               ),
               const SizedBox(width: 10),
               Expanded(
-                child: ElevatedButton.icon(
-                  onPressed: () {
+                child: CustomBtn(
+                  onTap: () {
                     bt.updatePinConfig(
                       builtinLedPin: _builtinLedPin,
                       relay1Pin: _relay1Pin,
@@ -407,18 +385,20 @@ class _PinConfigurationDialogState extends State<PinConfigurationDialog> {
                       'Pins saved: Relays ($_relay1Pin, $_relay2Pin, $_relay3Pin, $_relay4Pin), RGB ($_rgbRedPin, $_rgbGreenPin, $_rgbBluePin)',
                     );
                   },
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: AppColors.primaryOrange,
-                    foregroundColor: Colors.white,
-                    padding: const EdgeInsets.symmetric(vertical: 12),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(10),
-                    ),
+                  text: 'Save Pin Configuration',
+                  prefix: const Icon(
+                    Icons.check_rounded,
+                    size: 18,
+                    color: Colors.white,
                   ),
-                  icon: const Icon(Icons.check_rounded, size: 18),
-                  label: const Text(
-                    'Save Pin Configuration',
-                    style: TextStyle(fontSize: 13, fontWeight: FontWeight.w700),
+                  bgColor: AppColors.primaryOrange,
+                  borderColor: AppColors.primaryOrange,
+                  radius: 10,
+                  height: 44,
+                  style: const TextStyle(
+                    fontSize: 13,
+                    fontWeight: FontWeight.w700,
+                    color: Colors.white,
                   ),
                 ),
               ),
@@ -443,7 +423,18 @@ class _PinConfigurationDialogState extends State<PinConfigurationDialog> {
     );
   }
 
+  String _formatPinLabel(MicrocontrollerBoard board, int p) {
+    final tags = <String>[];
+    if (board.pwmPins.contains(p)) tags.add('PWM');
+    if (board.adcPins.contains(p)) tags.add('ADC');
+    if (board.dacPins.contains(p)) tags.add('DAC');
+    if (board.touchPins.contains(p)) tags.add('Touch');
+    final tagText = tags.isNotEmpty ? ' [${tags.join(', ')}]' : '';
+    return 'GPIO $p$tagText';
+  }
+
   Widget _buildPinSelectorTile({
+    required MicrocontrollerBoard board,
     required String label,
     required String description,
     required int currentPin,
@@ -492,36 +483,35 @@ class _PinConfigurationDialogState extends State<PinConfigurationDialog> {
             ),
           ),
           const SizedBox(width: 8),
-          Container(
-            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 2),
-            decoration: BoxDecoration(
+          CustomDropdownBtn<int>(
+            value: currentPin,
+            btnDecoration: BoxDecoration(
               color: AppColors.cardBackground,
               borderRadius: BorderRadius.circular(8),
               border: Border.all(color: AppColors.primaryOrange, width: 1.2),
             ),
-            child: DropdownButtonHideUnderline(
-              child: DropdownButton<int>(
-                value: currentPin,
-                icon: const Icon(Icons.arrow_drop_down,
-                    color: AppColors.primaryOrange, size: 20),
-                items: pins.map((p) {
-                  return DropdownMenuItem<int>(
-                    value: p,
-                    child: Text(
-                      'GPIO $p',
-                      style: const TextStyle(
-                        fontSize: 13,
-                        fontWeight: FontWeight.w700,
-                        color: AppColors.primaryText,
-                      ),
-                    ),
-                  );
-                }).toList(),
-                onChanged: (p) {
-                  if (p != null) onChanged(p);
-                },
-              ),
+            contentPadding: const EdgeInsets.symmetric(horizontal: 10, vertical: 2),
+            icon: const Icon(
+              Icons.arrow_drop_down,
+              color: AppColors.primaryOrange,
+              size: 20,
             ),
+            items: pins.map((p) {
+              return DropdownMenuItem<int>(
+                value: p,
+                child: Text(
+                  _formatPinLabel(board, p),
+                  style: const TextStyle(
+                    fontSize: 12,
+                    fontWeight: FontWeight.w700,
+                    color: AppColors.primaryText,
+                  ),
+                ),
+              );
+            }).toList(),
+            onChanged: (p) {
+              if (p != null) onChanged(p);
+            },
           ),
         ],
       ),

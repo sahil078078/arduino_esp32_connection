@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../src/commons/custom_drop_down_btn.dart';
 import '../theme/app_colors.dart';
 
 class PwmControlCard extends StatelessWidget {
@@ -93,36 +94,34 @@ class PwmControlCard extends StatelessWidget {
               ),
               const SizedBox(width: 8),
               // Pin Selector Chip
-              Container(
-                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
-                decoration: BoxDecoration(
+              CustomDropdownBtn<int>(
+                value: availablePins.contains(pwmPin)
+                    ? pwmPin
+                    : (availablePins.isNotEmpty ? availablePins.first : pwmPin),
+                btnDecoration: BoxDecoration(
                   color: AppColors.surfaceMuted,
                   borderRadius: BorderRadius.circular(8),
                   border: Border.all(color: AppColors.border, width: 1),
                 ),
-                child: DropdownButtonHideUnderline(
-                  child: DropdownButton<int>(
-                    value: availablePins.contains(pwmPin) ? pwmPin : (availablePins.isNotEmpty ? availablePins.first : pwmPin),
-                    icon: const Icon(Icons.arrow_drop_down,
-                        color: AppColors.secondaryText, size: 20),
-                    items: (Set<int>.from(availablePins)..add(pwmPin)).toList().map((p) {
-                      return DropdownMenuItem<int>(
-                        value: p,
-                        child: Text(
-                          'GPIO $p',
-                          style: const TextStyle(
-                            fontSize: 12,
-                            fontWeight: FontWeight.w600,
-                            color: AppColors.primaryText,
-                          ),
-                        ),
-                      );
-                    }).toList(),
-                    onChanged: (p) {
-                      if (p != null) onPinChanged(p);
-                    },
-                  ),
-                ),
+                contentPadding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                icon: const Icon(Icons.arrow_drop_down,
+                    color: AppColors.secondaryText, size: 20),
+                items: (Set<int>.from(availablePins)..add(pwmPin)).toList().map((p) {
+                  return DropdownMenuItem<int>(
+                    value: p,
+                    child: Text(
+                      'GPIO $p',
+                      style: const TextStyle(
+                        fontSize: 12,
+                        fontWeight: FontWeight.w600,
+                        color: AppColors.primaryText,
+                      ),
+                    ),
+                  );
+                }).toList(),
+                onChanged: (p) {
+                  if (p != null) onPinChanged(p);
+                },
               ),
             ],
           ),

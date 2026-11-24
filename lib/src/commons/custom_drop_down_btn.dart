@@ -13,6 +13,10 @@ class CustomDropdownBtn<T> extends StatelessWidget {
   final bool isRequiredMark;
   final TextStyle? labelStyle;
   final BoxDecoration? btnDecoration;
+  final EdgeInsetsGeometry? contentPadding;
+  final bool isExpanded;
+  final Widget? icon;
+
   const CustomDropdownBtn({
     super.key,
     required this.items,
@@ -27,90 +31,79 @@ class CustomDropdownBtn<T> extends StatelessWidget {
     this.labelStyle,
     this.isRequiredMark = false,
     this.btnDecoration,
+    this.contentPadding,
+    this.isExpanded = false,
+    this.icon,
   });
 
   @override
   Widget build(BuildContext context) {
+    final dropdown = Container(
+      width: btnWidth,
+      height: btnHeight,
+      padding: contentPadding ?? const EdgeInsets.symmetric(horizontal: 10, vertical: 2),
+      decoration: btnDecoration ??
+          BoxDecoration(
+            color: Constants.instance.white,
+            borderRadius: BorderRadius.circular(8),
+            border: Border.all(color: Constants.instance.primary, width: 1.2),
+          ),
+      child: DropdownButtonHideUnderline(
+        child: DropdownButton<T>(
+          value: value,
+          isDense: true,
+          isExpanded: isExpanded,
+          menuMaxHeight: dropDownMaxHeight ?? 380,
+          dropdownColor: Constants.instance.white,
+          borderRadius: BorderRadius.circular(10),
+          icon: icon ??
+              Icon(
+                Icons.arrow_drop_down,
+                color: Constants.instance.primary,
+                size: 20,
+              ),
+          hint: hint ??
+              (hintText != null
+                  ? Text(
+                      hintText!,
+                      style: AppTextStyle.regular.copyWith(
+                        fontSize: 12.5,
+                        color: Constants.instance.grey500,
+                      ),
+                    )
+                  : null),
+          items: items,
+          onChanged: onChanged,
+        ),
+      ),
+    );
+
+    if (label == null) {
+      return dropdown;
+    }
+
     return Column(
       mainAxisSize: MainAxisSize.min,
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        if (label != null)
-          Padding(
-            padding: const EdgeInsets.only(bottom: 6),
-            child: CustomRichText(
-              text1: "$label",
-              text2: isRequiredMark ? "*" : null,
-              style: labelStyle ??
-                  AppTextStyle.medium.copyWith(
-                    fontSize: 13,
-                    color: Constants.instance.black,
-                  ),
-              style2: AppTextStyle.medium.copyWith(
-                fontSize: 17,
-                height: 0.5,
-                color: Constants.instance.red,
-              ),
+        Padding(
+          padding: const EdgeInsets.only(bottom: 6),
+          child: CustomRichText(
+            text1: "$label",
+            text2: isRequiredMark ? "*" : null,
+            style: labelStyle ??
+                AppTextStyle.medium.copyWith(
+                  fontSize: 13,
+                  color: Constants.instance.black,
+                ),
+            style2: AppTextStyle.medium.copyWith(
+              fontSize: 17,
+              height: 0.5,
+              color: Constants.instance.red,
             ),
           ),
-
-        //TODO : DROPDOWN BTN 2
-        // DropdownButton2<T>(
-        //   items: items,
-        //   isDense: true,
-        //   iconStyleData: IconStyleData(
-        //     iconSize: 20,
-        //     icon: Padding(
-        //       padding: const EdgeInsets.only(right: 6),
-        //       child: Icon(Icons.keyboard_arrow_down_rounded, color: Constants.instance.primary),
-        //     ),
-        //     openMenuIcon: Padding(
-        //       padding: const EdgeInsets.only(right: 6),
-        //       child: Icon(Icons.keyboard_arrow_up_rounded, color: Constants.instance.grey500),
-        //     ),
-        //     iconEnabledColor: Constants.instance.primary,
-        //     iconDisabledColor: Constants.instance.greyShade300,
-        //   ),
-        //   isExpanded: true,
-        //   hint: hintText.notEmptyNotNull
-        //       ? Text(
-        //           hintText!,
-        //           style: AppTextStyle.regular.copyWith(color: Constants.instance.greyShade700, fontSize: 12.5),
-        //           overflow: TextOverflow.ellipsis,
-        //         )
-        //       : hint,
-        //   style: AppTextStyle.medium.copyWith(fontSize: 13.5, color: Constants.instance.primary),
-        //   customButton: null,
-        //   menuItemStyleData: const MenuItemStyleData(height: 38),
-        //   underline: const SizedBox.shrink(),
-        //   dropdownStyleData: DropdownStyleData(
-        //     elevation: 1,
-        //     offset: const Offset(0, -10),
-        //     padding: EdgeInsets.zero,
-        //     useSafeArea: true,
-        //     maxHeight: dropDownMaxHeight ?? 450,
-        //     isOverButton: false,
-        //     useRootNavigator: true,
-        //     scrollPadding: EdgeInsets.zero,
-        //     decoration: BoxDecoration(
-        //       color: Constants.instance.white,
-        //       borderRadius: BorderRadius.circular(6),
-        //     ),
-        //   ),
-        //   onChanged: onChanged,
-        //   value: value,
-        //   buttonStyleData: ButtonStyleData(
-        //     padding: const EdgeInsets.symmetric(horizontal: 0, vertical: 8),
-        //     height: btnHeight ?? 42,
-        //     width: btnWidth,
-        //     decoration: btnDecoration ??
-        //         BoxDecoration(
-        //           color: Constants.instance.white,
-        //           borderRadius: BorderRadius.circular(6),
-        //           border: Border.all(color: Constants.instance.greyShade500, width: 0.75),
-        //         ),
-        //   ),
-        // ),
+        ),
+        dropdown,
       ],
     );
   }

@@ -3,15 +3,11 @@ import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
 import '../models/board_model.dart';
 import '../providers/bluetooth_provider.dart';
+import '../src/commons/btn/custom_btn.dart';
 import '../src/helper/app_toasting.dart';
 import '../theme/app_colors.dart';
 
-enum CodeTab {
-  arduinoUno,
-  esp32DevKitV1,
-  esp32S3,
-  esp32Wifi,
-}
+enum CodeTab { arduinoUno, esp32DevKitV1, esp32S3, esp32Wifi }
 
 class ArduinoCodeScreen extends StatefulWidget {
   const ArduinoCodeScreen({super.key});
@@ -49,7 +45,8 @@ class _ArduinoCodeScreenState extends State<ArduinoCodeScreen> {
   }
 
   // 1. Arduino Uno / Nano + HC-05 Bluetooth Sketch
-  static const String _arduinoUnoSketch = '''// ========================================================
+  static const String _arduinoUnoSketch =
+      '''// ========================================================
 // Arduino Uno / Nano Bluetooth Controller Sketch
 // Hardware: Arduino Uno + HC-05 / HC-06 Bluetooth Module
 // Wiring: HC-05 TX -> Pin 2 (RX) | HC-05 RX -> Pin 3 (TX)
@@ -249,7 +246,8 @@ void loop() {
 }''';
 
   // 2. ESP32 DevKit V1 Classic Bluetooth Sketch
-  static const String _esp32DevKitV1Sketch = '''// ========================================================
+  static const String _esp32DevKitV1Sketch =
+      '''// ========================================================
 // ESP32 DevKit V1 Bluetooth Controller Sketch
 // Hardware: ESP32 DevKit V1 (ESP-WROOM-32)
 // Uses NATIVE ON-CHIP Classic Bluetooth (BluetoothSerial.h)
@@ -484,7 +482,8 @@ void loop() {
 }''';
 
   // 3. ESP32-S3 DevKitC-1 Serial / Bluetooth Sketch
-  static const String _esp32S3Sketch = '''// ========================================================
+  static const String _esp32S3Sketch =
+      '''// ========================================================
 // ESP32-S3 DevKitC-1 Controller Sketch
 // Hardware: ESP32-S3 (Xtensa Dual-Core LX7)
 // Features: Built-in WS2812 RGB LED (GPIO 48) & External 4-Pin RGB LED,
@@ -663,7 +662,8 @@ void loop() {
 }''';
 
   // 4. ESP32 WiFi Controller Sketch (SoftAP + WebServer + Socket)
-  static const String _esp32WifiSketch = '''// ========================================================
+  static const String _esp32WifiSketch =
+      '''// ========================================================
 // ESP32 WiFi Controller Sketch (HTTP WebServer + SoftAP)
 // Hardware: ESP32 DevKit V1 / ESP32-S3 / Any ESP32 Board
 // Modes Supported:
@@ -1082,23 +1082,32 @@ void loop() {
                         overflow: TextOverflow.ellipsis,
                       ),
                     ),
-                    ElevatedButton.icon(
-                      onPressed: () {
+                    CustomBtn(
+                      onTap: () {
                         Clipboard.setData(ClipboardData(text: _currentSketch));
                         AppToasting.showSuccessToast(
-                            '$_currentBoardTitle copied to clipboard!');
+                          '$_currentBoardTitle copied to clipboard!',
+                        );
                       },
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: AppColors.primaryOrange,
-                        foregroundColor: Colors.white,
-                        padding: const EdgeInsets.symmetric(
-                            horizontal: 12, vertical: 8),
-                        minimumSize: Size.zero,
-                        tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                      text: 'Copy Sketch',
+                      prefix: const Icon(
+                        Icons.copy_rounded,
+                        size: 14,
+                        color: Colors.white,
                       ),
-                      icon: const Icon(Icons.copy_rounded, size: 14),
-                      label: const Text('Copy Sketch',
-                          style: TextStyle(fontSize: 12)),
+                      bgColor: AppColors.primaryOrange,
+                      borderColor: AppColors.primaryOrange,
+                      radius: 8,
+                      height: 34,
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 10,
+                        vertical: 4,
+                      ),
+                      style: const TextStyle(
+                        fontSize: 12,
+                        fontWeight: FontWeight.w600,
+                        color: Colors.white,
+                      ),
                     ),
                   ],
                 ),
@@ -1171,11 +1180,19 @@ void loop() {
             children: [
               const Row(
                 children: [
-                  Icon(Icons.cable_rounded, size: 18, color: AppColors.primaryOrange),
+                  Icon(
+                    Icons.cable_rounded,
+                    size: 18,
+                    color: AppColors.primaryOrange,
+                  ),
                   SizedBox(width: 8),
                   Text(
                     'Arduino Uno + HC-05 & RGB Wiring',
-                    style: TextStyle(fontSize: 14, fontWeight: FontWeight.w700, color: AppColors.primaryText),
+                    style: TextStyle(
+                      fontSize: 14,
+                      fontWeight: FontWeight.w700,
+                      color: AppColors.primaryText,
+                    ),
                   ),
                 ],
               ),
@@ -1183,7 +1200,11 @@ void loop() {
               _wiringRow('HC-05 VCC', '->', 'Arduino 5V'),
               _wiringRow('HC-05 GND', '->', 'Arduino GND'),
               _wiringRow('HC-05 TX', '->', 'Arduino Pin 2 (Software RX)'),
-              _wiringRow('HC-05 RX', '->', 'Arduino Pin 3 (Software TX) [Via 1k/2k Divider]'),
+              _wiringRow(
+                'HC-05 RX',
+                '->',
+                'Arduino Pin 3 (Software TX) [Via 1k/2k Divider]',
+              ),
               _wiringRow('RGB Red', '->', 'Pin 9 (~PWM)'),
               _wiringRow('RGB Common', '->', 'GND (Cathode) or 5V (Anode)'),
               _wiringRow('RGB Green', '->', 'Pin 10 (~PWM)'),
@@ -1205,21 +1226,49 @@ void loop() {
             children: [
               const Row(
                 children: [
-                  Icon(Icons.bluetooth_connected_rounded, size: 18, color: AppColors.primaryOrange),
+                  Icon(
+                    Icons.bluetooth_connected_rounded,
+                    size: 18,
+                    color: AppColors.primaryOrange,
+                  ),
                   SizedBox(width: 8),
                   Text(
                     'ESP32 DevKit V1 Hardware Highlights',
-                    style: TextStyle(fontSize: 14, fontWeight: FontWeight.w700, color: AppColors.primaryText),
+                    style: TextStyle(
+                      fontSize: 14,
+                      fontWeight: FontWeight.w700,
+                      color: AppColors.primaryText,
+                    ),
                   ),
                 ],
               ),
               const SizedBox(height: 8),
-              _wiringRow('Bluetooth', '->', 'Native Classic BT Serial (Device: "ESP32-Bluetooth-Hub")'),
+              _wiringRow(
+                'Bluetooth',
+                '->',
+                'Native Classic BT Serial (Device: "ESP32-Bluetooth-Hub")',
+              ),
               _wiringRow('Builtin LED', '->', 'GPIO 2 (Blue On-board LED)'),
-              _wiringRow('4 Relays', '->', 'GPIO 18, 19, 21, 22 (Configurable in Settings)'),
-              _wiringRow('4-Pin RGB', '->', 'Red: GPIO 4, Green: GPIO 5, Blue: GPIO 17 (LEDC Channels 1, 2, 3)'),
-              _wiringRow('True DACs', '->', 'GPIO 25 (DAC1) & GPIO 26 (DAC2) [0 - 3.3V]'),
-              _wiringRow('Touch Pins', '->', 'T0 (GPIO 4), T2 (GPIO 2), T3 (GPIO 15)...'),
+              _wiringRow(
+                '4 Relays',
+                '->',
+                'GPIO 18, 19, 21, 22 (Configurable in Settings)',
+              ),
+              _wiringRow(
+                '4-Pin RGB',
+                '->',
+                'Red: GPIO 4, Green: GPIO 5, Blue: GPIO 17 (LEDC Channels 1, 2, 3)',
+              ),
+              _wiringRow(
+                'True DACs',
+                '->',
+                'GPIO 25 (DAC1) & GPIO 26 (DAC2) [0 - 3.3V]',
+              ),
+              _wiringRow(
+                'Touch Pins',
+                '->',
+                'T0 (GPIO 4), T2 (GPIO 2), T3 (GPIO 15)...',
+              ),
             ],
           ),
         );
@@ -1237,21 +1286,49 @@ void loop() {
             children: [
               const Row(
                 children: [
-                  Icon(Icons.memory_rounded, size: 18, color: AppColors.primaryOrange),
+                  Icon(
+                    Icons.memory_rounded,
+                    size: 18,
+                    color: AppColors.primaryOrange,
+                  ),
                   SizedBox(width: 8),
                   Text(
                     'ESP32-S3 DevKitC-1 Hardware Highlights',
-                    style: TextStyle(fontSize: 14, fontWeight: FontWeight.w700, color: AppColors.primaryText),
+                    style: TextStyle(
+                      fontSize: 14,
+                      fontWeight: FontWeight.w700,
+                      color: AppColors.primaryText,
+                    ),
                   ),
                 ],
               ),
               const SizedBox(height: 8),
-              _wiringRow('Serial / BLE', '->', 'Native BLE 5.0 / USB-OTG Serial CDC (115200 Baud)'),
+              _wiringRow(
+                'Serial / BLE',
+                '->',
+                'Native BLE 5.0 / USB-OTG Serial CDC (115200 Baud)',
+              ),
               _wiringRow('Onboard RGB', '->', 'GPIO 48 (WS2812 Smart RGB LED)'),
-              _wiringRow('External RGB', '->', 'Red: GPIO 15, Green: GPIO 16, Blue: GPIO 17'),
-              _wiringRow('4 Relays', '->', 'GPIO 4, 5, 6, 7 (Configurable in Settings)'),
-              _wiringRow('14 Touch', '->', 'Touch 1 to Touch 14 (GPIO 1 to 14)'),
-              _wiringRow('20 ADC', '->', '12-bit ADC Channels 1 to 20 (GPIO 1 to 20)'),
+              _wiringRow(
+                'External RGB',
+                '->',
+                'Red: GPIO 15, Green: GPIO 16, Blue: GPIO 17',
+              ),
+              _wiringRow(
+                '4 Relays',
+                '->',
+                'GPIO 4, 5, 6, 7 (Configurable in Settings)',
+              ),
+              _wiringRow(
+                '14 Touch',
+                '->',
+                'Touch 1 to Touch 14 (GPIO 1 to 14)',
+              ),
+              _wiringRow(
+                '20 ADC',
+                '->',
+                '12-bit ADC Channels 1 to 20 (GPIO 1 to 20)',
+              ),
             ],
           ),
         );
@@ -1269,21 +1346,45 @@ void loop() {
             children: [
               const Row(
                 children: [
-                  Icon(Icons.wifi_rounded, size: 18, color: AppColors.primaryOrange),
+                  Icon(
+                    Icons.wifi_rounded,
+                    size: 18,
+                    color: AppColors.primaryOrange,
+                  ),
                   SizedBox(width: 8),
                   Text(
                     'ESP32 WiFi (SoftAP & Router Mode) Guide',
-                    style: TextStyle(fontSize: 14, fontWeight: FontWeight.w700, color: AppColors.primaryText),
+                    style: TextStyle(
+                      fontSize: 14,
+                      fontWeight: FontWeight.w700,
+                      color: AppColors.primaryText,
+                    ),
                   ),
                 ],
               ),
               const SizedBox(height: 8),
-              _wiringRow('SoftAP SSID', '->', 'ESP32_Controller_AP (Password: password123)'),
+              _wiringRow(
+                'SoftAP SSID',
+                '->',
+                'ESP32_Controller_AP (Password: password123)',
+              ),
               _wiringRow('Default IP', '->', '192.168.4.1 (Port 80)'),
-              _wiringRow('Connection', '->', 'Connect phone WiFi directly to "ESP32_Controller_AP"'),
-              _wiringRow('4-Pin RGB', '->', 'Red: GPIO 4, Green: GPIO 5, Blue: GPIO 17'),
+              _wiringRow(
+                'Connection',
+                '->',
+                'Connect phone WiFi directly to "ESP32_Controller_AP"',
+              ),
+              _wiringRow(
+                '4-Pin RGB',
+                '->',
+                'Red: GPIO 4, Green: GPIO 5, Blue: GPIO 17',
+              ),
               _wiringRow('4 Relays', '->', 'GPIO 18, 19, 21, 22'),
-              _wiringRow('PWM / ADC', '->', 'PWM: GPIO 16, ADC: GPIO 32-39, Touch: GPIO 4'),
+              _wiringRow(
+                'PWM / ADC',
+                '->',
+                'PWM: GPIO 16, ADC: GPIO 32-39, Touch: GPIO 4',
+              ),
             ],
           ),
         );
@@ -1307,7 +1408,13 @@ void loop() {
               ),
             ),
           ),
-          Text(arrow, style: const TextStyle(fontSize: 11.5, color: AppColors.secondaryText)),
+          Text(
+            arrow,
+            style: const TextStyle(
+              fontSize: 11.5,
+              color: AppColors.secondaryText,
+            ),
+          ),
           const SizedBox(width: 8),
           Expanded(
             child: Text(

@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../models/board_model.dart';
 import '../providers/bluetooth_provider.dart';
+import '../src/commons/btn/custom_btn.dart';
+import '../src/commons/custom_drop_down_btn.dart';
 import '../theme/app_colors.dart';
 
 class SensorsDacCard extends StatefulWidget {
@@ -137,36 +139,32 @@ class _SensorsDacCardState extends State<SensorsDacCard> {
                 ],
               ),
               if (board.hasDac) ...[
-                Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
-                  decoration: BoxDecoration(
+                CustomDropdownBtn<int>(
+                  value: bt.dacPin,
+                  btnDecoration: BoxDecoration(
                     color: AppColors.surfaceMuted,
                     borderRadius: BorderRadius.circular(6),
                     border: Border.all(color: AppColors.border),
                   ),
-                  child: DropdownButtonHideUnderline(
-                    child: DropdownButton<int>(
-                      value: bt.dacPin,
-                      icon: const Icon(Icons.arrow_drop_down,
-                          color: AppColors.primaryOrange, size: 18),
-                      items: board.dacPins.map((p) {
-                        return DropdownMenuItem<int>(
-                          value: p,
-                          child: Text(
-                            'DAC Pin $p',
-                            style: const TextStyle(
-                              fontSize: 11,
-                              fontWeight: FontWeight.w700,
-                              color: AppColors.primaryText,
-                            ),
-                          ),
-                        );
-                      }).toList(),
-                      onChanged: (p) {
-                        if (p != null) bt.setDacPin(p);
-                      },
-                    ),
-                  ),
+                  contentPadding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                  icon: const Icon(Icons.arrow_drop_down,
+                      color: AppColors.primaryOrange, size: 18),
+                  items: board.dacPins.map((p) {
+                    return DropdownMenuItem<int>(
+                      value: p,
+                      child: Text(
+                        'DAC Pin $p',
+                        style: const TextStyle(
+                          fontSize: 11,
+                          fontWeight: FontWeight.w700,
+                          color: AppColors.primaryText,
+                        ),
+                      ),
+                    );
+                  }).toList(),
+                  onChanged: (p) {
+                    if (p != null) bt.setDacPin(p);
+                  },
                 ),
               ],
             ],
@@ -270,18 +268,18 @@ class _SensorsDacCardState extends State<SensorsDacCard> {
                 ),
               ),
               if (board.hasTouch && board.touchPins.isNotEmpty) ...[
-                ElevatedButton.icon(
-                  onPressed: widget.isConnected
+                CustomBtn(
+                  onTap: widget.isConnected
                       ? () => bt.requestTouchRead(_selectedTouchPin)
                       : null,
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: AppColors.primaryOrange,
-                    foregroundColor: Colors.white,
-                    padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
-                    minimumSize: Size.zero,
-                  ),
-                  icon: const Icon(Icons.sensors, size: 12),
-                  label: const Text('Read Touch', style: TextStyle(fontSize: 11)),
+                  text: 'Read Touch',
+                  prefix: const Icon(Icons.sensors, size: 12, color: Colors.white),
+                  bgColor: AppColors.primaryOrange,
+                  borderColor: AppColors.primaryOrange,
+                  radius: 6,
+                  height: 30,
+                  padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                  style: const TextStyle(fontSize: 11, fontWeight: FontWeight.w600, color: Colors.white),
                 ),
               ],
             ],
@@ -347,18 +345,18 @@ class _SensorsDacCardState extends State<SensorsDacCard> {
                   ],
                 ),
               ),
-              ElevatedButton.icon(
-                onPressed: widget.isConnected
+              CustomBtn(
+                onTap: widget.isConnected
                     ? () => bt.requestAdcRead(_selectedAdcPin)
                     : null,
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: AppColors.primaryOrange,
-                  foregroundColor: Colors.white,
-                  padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
-                  minimumSize: Size.zero,
-                ),
-                icon: const Icon(Icons.refresh_rounded, size: 12),
-                label: const Text('Read ADC', style: TextStyle(fontSize: 11)),
+                text: 'Read ADC',
+                prefix: const Icon(Icons.refresh_rounded, size: 12, color: Colors.white),
+                bgColor: AppColors.primaryOrange,
+                borderColor: AppColors.primaryOrange,
+                radius: 6,
+                height: 30,
+                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                style: const TextStyle(fontSize: 11, fontWeight: FontWeight.w600, color: Colors.white),
               ),
             ],
           ),

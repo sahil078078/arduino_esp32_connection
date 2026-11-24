@@ -4,6 +4,7 @@ import '../dialogs/board_pinout_sheet.dart';
 import '../dialogs/board_selection_dialog.dart';
 import '../dialogs/pin_configuration_dialog.dart';
 import '../providers/bluetooth_provider.dart';
+import '../src/commons/custom_switch_tile.dart';
 import '../src/helper/app_toasting.dart';
 import '../src/helper/app_url.dart';
 import '../theme/app_colors.dart';
@@ -347,35 +348,14 @@ class SettingsScreen extends StatelessWidget {
                 ),
                 child: Column(
                   children: [
-                    SwitchListTile(
-                      title: const Text(
-                        'Terminal Auto-Scroll',
-                        style: TextStyle(
-                          fontSize: 14,
-                          fontWeight: FontWeight.w600,
-                          color: AppColors.primaryText,
-                        ),
+                    Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                      child: CustomSwitchTile(
+                        value: bt.autoScroll,
+                        onChanged: (_) => bt.toggleAutoScroll(),
+                        title: 'Terminal Auto-Scroll',
+                        subTitle: 'Automatically scroll to newest messages',
                       ),
-                      subtitle: const Text(
-                        'Automatically scroll to newest messages',
-                        style: TextStyle(
-                          fontSize: 12,
-                          color: AppColors.secondaryText,
-                        ),
-                      ),
-                      value: bt.autoScroll,
-                      thumbColor: WidgetStateProperty.resolveWith(
-                        (states) => Colors.white,
-                      ),
-                      trackColor: WidgetStateProperty.resolveWith(
-                        (states) => states.contains(WidgetState.selected)
-                            ? AppColors.primaryOrange
-                            : const Color(0xFFE5E7EB),
-                      ),
-                      trackOutlineColor: WidgetStateProperty.resolveWith(
-                        (states) => Colors.transparent,
-                      ),
-                      onChanged: (_) => bt.toggleAutoScroll(),
                     ),
                     const Divider(color: AppColors.border, height: 1),
                     ListTile(
