@@ -54,21 +54,27 @@ class BoardSelectionDialog extends StatelessWidget {
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              const Row(
-                children: [
-                  Icon(Icons.developer_board_rounded,
-                      color: AppColors.primaryOrange, size: 22),
-                  SizedBox(width: 10),
-                  Text(
-                    'Select Microcontroller Board',
-                    style: TextStyle(
-                      fontSize: 17,
-                      fontWeight: FontWeight.w700,
-                      color: AppColors.primaryText,
+              const Expanded(
+                child: Row(
+                  children: [
+                    Icon(Icons.developer_board_rounded,
+                        color: AppColors.primaryOrange, size: 22),
+                    SizedBox(width: 10),
+                    Flexible(
+                      child: Text(
+                        'Select Microcontroller Board',
+                        overflow: TextOverflow.ellipsis,
+                        style: TextStyle(
+                          fontSize: 17,
+                          fontWeight: FontWeight.w700,
+                          color: AppColors.primaryText,
+                        ),
+                      ),
                     ),
-                  ),
-                ],
+                  ],
+                ),
               ),
+              const SizedBox(width: 8),
               const CustomCloseBtn(size: 28),
             ],
           ),

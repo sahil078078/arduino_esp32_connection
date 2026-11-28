@@ -131,20 +131,26 @@ class _RgbLedControlCardState extends State<RgbLedControlCard> {
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      const Row(
-                        children: [
-                          Icon(Icons.tune_rounded, color: AppColors.primaryOrange, size: 22),
-                          SizedBox(width: 8),
-                          Text(
-                            'RGB GPIO Pin Configuration',
-                            style: TextStyle(
-                              fontSize: 16,
-                              fontWeight: FontWeight.w700,
-                              color: AppColors.primaryText,
+                      const Expanded(
+                        child: Row(
+                          children: [
+                            Icon(Icons.tune_rounded, color: AppColors.primaryOrange, size: 22),
+                            SizedBox(width: 8),
+                            Flexible(
+                              child: Text(
+                                'RGB GPIO Pin Configuration',
+                                overflow: TextOverflow.ellipsis,
+                                style: TextStyle(
+                                  fontSize: 16,
+                                  fontWeight: FontWeight.w700,
+                                  color: AppColors.primaryText,
+                                ),
+                              ),
                             ),
-                          ),
-                        ],
+                          ],
+                        ),
                       ),
+                      const SizedBox(width: 8),
                       const CustomCloseBtn(size: 28),
                     ],
                   ),

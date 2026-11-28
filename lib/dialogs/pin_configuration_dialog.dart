@@ -107,24 +107,30 @@ class _PinConfigurationDialogState extends State<PinConfigurationDialog> {
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Row(
-                children: [
-                  const Icon(
-                    Icons.tune_rounded,
-                    color: AppColors.primaryOrange,
-                    size: 22,
-                  ),
-                  const SizedBox(width: 8),
-                  Text(
-                    'GPIO & Relay Pin Settings',
-                    style: const TextStyle(
-                      fontSize: 17,
-                      fontWeight: FontWeight.w700,
-                      color: AppColors.primaryText,
+              const Expanded(
+                child: Row(
+                  children: [
+                    Icon(
+                      Icons.tune_rounded,
+                      color: AppColors.primaryOrange,
+                      size: 22,
                     ),
-                  ),
-                ],
+                    SizedBox(width: 8),
+                    Flexible(
+                      child: Text(
+                        'GPIO & Relay Pin Settings',
+                        overflow: TextOverflow.ellipsis,
+                        style: TextStyle(
+                          fontSize: 17,
+                          fontWeight: FontWeight.w700,
+                          color: AppColors.primaryText,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
               ),
+              const SizedBox(width: 8),
               const CustomCloseBtn(size: 28),
             ],
           ),

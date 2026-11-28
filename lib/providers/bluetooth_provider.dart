@@ -21,7 +21,15 @@ class BluetoothProvider extends ChangeNotifier {
   StreamSubscription<bool>? _wifiStateSub;
 
   ConnectionMedium _connectionMedium = ConnectionMedium.bluetooth;
-  ConnectionMedium get connectionMedium => _connectionMedium;
+  ConnectionMedium get connectionMedium {
+    if (_wifiService.isConnected && !_bluetoothService.isConnected) {
+      return ConnectionMedium.wifi;
+    }
+    if (_bluetoothService.isConnected && !_wifiService.isConnected) {
+      return ConnectionMedium.bluetooth;
+    }
+    return _connectionMedium;
+  }
 
   void setConnectionMedium(ConnectionMedium medium) {
     _connectionMedium = medium;
@@ -68,15 +76,10 @@ class BluetoothProvider extends ChangeNotifier {
   bool get isBluetoothEnabled => _isBluetoothEnabled;
 
   bool get isScanning => _bluetoothService.isScanning;
-  bool get isConnected {
-    if (_connectionMedium == ConnectionMedium.bluetooth) {
-      return _bluetoothService.isConnected;
-    }
-    return _wifiService.isConnected;
-  }
+  bool get isConnected => _wifiService.isConnected || _bluetoothService.isConnected;
 
   bool get isConnecting {
-    if (_connectionMedium == ConnectionMedium.bluetooth) {
+    if (connectionMedium == ConnectionMedium.bluetooth) {
       return _bluetoothService.isConnecting;
     }
     return _wifiService.isConnecting;
@@ -382,11 +385,12 @@ class BluetoothProvider extends ChangeNotifier {
     notifyListeners();
   }
 
-  Future<int?> testPingWifi({required String ip, required int port}) async {
-    final latency = await _wifiService.testPing(ip: ip, port: port);
-    notifyListeners();
-    return latency;
-  }
+  Future<int?> testPingWifi({
+    required String ip,
+    required int port,
+    required WifiProtocol protocol,
+  }) =>
+      _wifiService.testPing(ip: ip, port: port, protocol: protocol);
 
   // RGB LED Actions (4-pin Non-Addressable R, G, B + Common Anode/Cathode)
   void updateRgbPins({

@@ -661,7 +661,7 @@ void loop() {
   }
 }''';
 
-  // 4. ESP32 WiFi Controller Sketch (SoftAP + WebServer + Socket)
+  // 4. ESP32 WiFi Controller Sketch (SoftAP + Station + HTTP WebServer)
   static const String _esp32WifiSketch =
       '''// ========================================================
 // ESP32 WiFi Controller Sketch (HTTP WebServer + SoftAP)
@@ -782,8 +782,8 @@ void handleCmd() {
 // Custom String / Voice Command (/text?t=ALL_ON or /text?t=RGB:255:0:0)
 void handleText() {
   sendCorsHeader();
-  if (server.hasArg("t")) {
-    String t = server.arg("t");
+  if (server.hasArg("t") || server.hasArg("msg")) {
+    String t = server.hasArg("t") ? server.arg("t") : server.arg("msg");
     t.trim();
 
     // Relays All ON / All OFF
@@ -960,10 +960,15 @@ void setup() {
   server.on("/", HTTP_GET, handleRoot);
   server.on("/ping", HTTP_GET, handlePing);
   server.on("/cmd", HTTP_GET, handleCmd);
+  server.on("/cmd", HTTP_POST, handleCmd);
   server.on("/text", HTTP_GET, handleText);
+  server.on("/text", HTTP_POST, handleText);
   server.on("/rgb", HTTP_GET, handleRgb);
+  server.on("/rgb", HTTP_POST, handleRgb);
   server.on("/pwm", HTTP_GET, handlePwm);
+  server.on("/pwm", HTTP_POST, handlePwm);
   server.on("/dac", HTTP_GET, handleDac);
+  server.on("/dac", HTTP_POST, handleDac);
   server.on("/adc", HTTP_GET, handleAdc);
   server.on("/touch", HTTP_GET, handleTouch);
 
@@ -1015,16 +1020,17 @@ void loop() {
           child: Divider(color: AppColors.border, height: 1),
         ),
         title: const Row(
+          mainAxisSize: MainAxisSize.min,
           children: [
-            Icon(Icons.code_rounded, color: AppColors.primaryOrange, size: 22),
+            Icon(Icons.code_rounded, color: AppColors.primaryOrange, size: 20),
             SizedBox(width: 8),
             Text(
-              'Microcontroller Code',
+              'Firmware Code',
               style: TextStyle(
-                fontSize: 20,
+                fontSize: 18,
                 fontWeight: FontWeight.w700,
                 color: AppColors.primaryText,
-                letterSpacing: -0.3,
+                letterSpacing: -0.2,
               ),
             ),
           ],

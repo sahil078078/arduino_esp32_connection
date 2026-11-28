@@ -63,13 +63,15 @@ class _TerminalScreenState extends State<TerminalScreen> {
               preferredSize: Size.fromHeight(1),
               child: Divider(color: AppColors.border, height: 1),
             ),
-            title: const Text(
-              'Bluetooth Terminal',
-              style: TextStyle(
-                fontSize: 20,
+            title: Text(
+              bt.connectionMedium == ConnectionMedium.wifi
+                  ? 'WiFi Terminal'
+                  : 'Serial Terminal',
+              style: const TextStyle(
+                fontSize: 18,
                 fontWeight: FontWeight.w700,
                 color: AppColors.primaryText,
-                letterSpacing: -0.3,
+                letterSpacing: -0.2,
               ),
             ),
             actions: [

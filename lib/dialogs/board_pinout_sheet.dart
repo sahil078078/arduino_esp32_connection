@@ -56,21 +56,27 @@ class BoardPinoutSheet extends StatelessWidget {
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Row(
-                children: [
-                  const Icon(Icons.memory_rounded,
-                      color: AppColors.primaryOrange, size: 22),
-                  const SizedBox(width: 8),
-                  Text(
-                    '${board.shortName} Pinout & Specs',
-                    style: const TextStyle(
-                      fontSize: 17,
-                      fontWeight: FontWeight.w700,
-                      color: AppColors.primaryText,
+              Expanded(
+                child: Row(
+                  children: [
+                    const Icon(Icons.memory_rounded,
+                        color: AppColors.primaryOrange, size: 22),
+                    const SizedBox(width: 8),
+                    Flexible(
+                      child: Text(
+                        '${board.shortName} Pinout & Specs',
+                        overflow: TextOverflow.ellipsis,
+                        style: const TextStyle(
+                          fontSize: 17,
+                          fontWeight: FontWeight.w700,
+                          color: AppColors.primaryText,
+                        ),
+                      ),
                     ),
-                  ),
-                ],
+                  ],
+                ),
               ),
+              const SizedBox(width: 8),
               const CustomCloseBtn(size: 28),
             ],
           ),

@@ -1,56 +1,42 @@
 import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
 import '../constants/constant.dart';
 
 class AppTextStyle {
-  static TextStyle thin = TextStyle(
+  static TextStyle thin = GoogleFonts.poppins(
     fontWeight: FontWeight.w100,
-    fontFamily: "Poppins",
     color: Constants.instance.black,
   );
-  static TextStyle extraLight = TextStyle(
+  static TextStyle extraLight = GoogleFonts.poppins(
     fontWeight: FontWeight.w200,
-    fontFamily: "Poppins",
     color: Constants.instance.black,
   );
-
-  static TextStyle light = TextStyle(
+  static TextStyle light = GoogleFonts.poppins(
     fontWeight: FontWeight.w300,
-    fontFamily: "Poppins",
     color: Constants.instance.black,
   );
-
-  static TextStyle regular = TextStyle(
+  static TextStyle regular = GoogleFonts.poppins(
     fontWeight: FontWeight.w400,
-    fontFamily: "Poppins",
     color: Constants.instance.black,
   );
-
-  static TextStyle medium = TextStyle(
+  static TextStyle medium = GoogleFonts.poppins(
     fontWeight: FontWeight.w500,
-    fontFamily: "Poppins",
     color: Constants.instance.black,
   );
-
-  static TextStyle semiBold = TextStyle(
+  static TextStyle semiBold = GoogleFonts.poppins(
     fontWeight: FontWeight.w600,
-    fontFamily: "Poppins",
     color: Constants.instance.black,
   );
-  static TextStyle bold = TextStyle(
+  static TextStyle bold = GoogleFonts.poppins(
     fontWeight: FontWeight.w700,
-    fontFamily: "Poppins",
     color: Constants.instance.black,
   );
-
-  static TextStyle extraBold = TextStyle(
+  static TextStyle extraBold = GoogleFonts.poppins(
     fontWeight: FontWeight.w800,
-    fontFamily: "Poppins",
     color: Constants.instance.black,
   );
-
-  static TextStyle black = TextStyle(
+  static TextStyle black = GoogleFonts.poppins(
     fontWeight: FontWeight.w900,
-    fontFamily: "Poppins",
     color: Constants.instance.black,
   );
 }

@@ -4,7 +4,9 @@ import '../dialogs/board_pinout_sheet.dart';
 import '../dialogs/board_selection_dialog.dart';
 import '../dialogs/pin_configuration_dialog.dart';
 import '../providers/bluetooth_provider.dart';
+import '../src/commons/btn/custom_btn.dart';
 import '../theme/app_colors.dart';
+import 'esp32_browser_screen.dart';
 import '../widgets/char_sender_card.dart';
 import '../widgets/led_control_card.dart';
 import '../widgets/pwm_control_card.dart';
@@ -37,32 +39,24 @@ class ControllerDashboardScreen extends StatelessWidget {
               preferredSize: Size.fromHeight(1),
               child: Divider(color: AppColors.border, height: 1),
             ),
-            title: Row(
+            title: const Row(
+              mainAxisSize: MainAxisSize.min,
               children: [
-                ClipRRect(
-                  borderRadius: BorderRadius.circular(6),
-                  child: Image.asset(
-                    'assets/images/app_icon.png',
-                    width: 26,
-                    height: 26,
-                    fit: BoxFit.cover,
-                    errorBuilder: (_, __, ___) => const Icon(
-                      Icons.memory_rounded,
-                      color: AppColors.primaryOrange,
-                      size: 22,
-                    ),
-                  ),
+                Icon(
+                  Icons.developer_board_rounded,
+                  color: AppColors.primaryOrange,
+                  size: 20,
                 ),
-                const SizedBox(width: 10),
-                const Expanded(
+                SizedBox(width: 8),
+                Flexible(
                   child: Text(
                     'Arduino/Esp32 Controller',
                     overflow: TextOverflow.ellipsis,
                     style: TextStyle(
-                      fontSize: 18,
+                      fontSize: 17,
                       fontWeight: FontWeight.w700,
                       color: AppColors.primaryText,
-                      letterSpacing: -0.3,
+                      letterSpacing: -0.2,
                     ),
                   ),
                 ),
@@ -72,14 +66,98 @@ class ControllerDashboardScreen extends StatelessWidget {
               StatusBadge(
                 isConnected: bt.isConnected,
                 isConnecting: bt.isConnecting,
-                label: bt.connectedDevice?.name ?? 'CONNECTED',
+                label: bt.isConnected
+                    ? (bt.connectionMedium == ConnectionMedium.wifi ? 'WIFI' : 'BT')
+                    : 'OFFLINE',
               ),
-              const SizedBox(width: 12),
+              if (bt.isWifiConnected) ...[
+                const SizedBox(width: 4),
+                IconButton(
+                  icon: const Icon(Icons.public_rounded, size: 20),
+                  tooltip: 'Open ESP32 Web Server',
+                  color: AppColors.primaryOrange,
+                  onPressed: () => Esp32BrowserScreen.open(
+                    context,
+                    ip: bt.wifiIp,
+                    port: bt.wifiPort,
+                  ),
+                ),
+              ],
+              const SizedBox(width: 4),
+              IconButton(
+                icon: const Icon(Icons.tune_rounded, size: 20),
+                tooltip: 'Select Board',
+                color: AppColors.primaryOrange,
+                onPressed: () => BoardSelectionDialog.show(context),
+              ),
+              const SizedBox(width: 6),
             ],
           ),
           body: ListView(
             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
             children: [
+              // Connected via WiFi: Quick Web Server Banner
+              if (bt.isWifiConnected)
+                Container(
+                  margin: const EdgeInsets.only(bottom: 16),
+                  padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+                  decoration: BoxDecoration(
+                    color: const Color(0xFFF0FDF4),
+                    borderRadius: BorderRadius.circular(12),
+                    border: Border.all(
+                      color: const Color(0xFF22C55E).withAlpha(90),
+                      width: 1,
+                    ),
+                  ),
+                  child: Row(
+                    children: [
+                      const Icon(
+                        Icons.public_rounded,
+                        color: Color(0xFF16A34A),
+                        size: 22,
+                      ),
+                      const SizedBox(width: 10),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            const Text(
+                              'ESP32 Web Server Active',
+                              style: TextStyle(
+                                fontSize: 13,
+                                fontWeight: FontWeight.w700,
+                                color: Color(0xFF15803D),
+                              ),
+                            ),
+                            Text(
+                              'http://${bt.wifiIp}:${bt.wifiPort}',
+                              style: const TextStyle(
+                                fontSize: 11,
+                                fontFamily: 'monospace',
+                                color: AppColors.secondaryText,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                      CustomBtn(
+                        onTap: () => Esp32BrowserScreen.open(
+                          context,
+                          ip: bt.wifiIp,
+                          port: bt.wifiPort,
+                        ),
+                        text: 'Open Web',
+                        prefix: const Icon(Icons.open_in_browser_rounded, size: 14, color: Colors.white),
+                        bgColor: const Color(0xFF16A34A),
+                        borderColor: const Color(0xFF16A34A),
+                        radius: 8,
+                        height: 32,
+                        padding: const EdgeInsets.symmetric(horizontal: 10),
+                        style: const TextStyle(fontSize: 11, fontWeight: FontWeight.w700, color: Colors.white),
+                      ),
+                    ],
+                  ),
+                ),
               // Connection Status Banner
               if (!bt.isConnected)
                 Container(

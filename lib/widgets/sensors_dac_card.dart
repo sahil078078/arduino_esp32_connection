@@ -124,19 +124,24 @@ class _SensorsDacCardState extends State<SensorsDacCard> {
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Row(
-                children: [
-                  const Icon(Icons.waves, size: 16, color: AppColors.primaryOrange),
-                  const SizedBox(width: 6),
-                  const Text(
-                    'DAC True Analog Output',
-                    style: TextStyle(
-                      fontSize: 13,
-                      fontWeight: FontWeight.w700,
-                      color: AppColors.primaryText,
+              const Expanded(
+                child: Row(
+                  children: [
+                    Icon(Icons.waves, size: 16, color: AppColors.primaryOrange),
+                    SizedBox(width: 6),
+                    Flexible(
+                      child: Text(
+                        'DAC True Analog Output',
+                        overflow: TextOverflow.ellipsis,
+                        style: TextStyle(
+                          fontSize: 13,
+                          fontWeight: FontWeight.w700,
+                          color: AppColors.primaryText,
+                        ),
+                      ),
                     ),
-                  ),
-                ],
+                  ],
+                ),
               ),
               if (board.hasDac) ...[
                 CustomDropdownBtn<int>(

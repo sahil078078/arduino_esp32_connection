@@ -31,10 +31,10 @@ class SettingsScreen extends StatelessWidget {
             title: const Text(
               'Settings',
               style: TextStyle(
-                fontSize: 20,
+                fontSize: 18,
                 fontWeight: FontWeight.w700,
                 color: AppColors.primaryText,
-                letterSpacing: -0.3,
+                letterSpacing: -0.2,
               ),
             ),
           ),

@@ -5,7 +5,7 @@ import 'app_colors.dart';
 
 class AppTheme {
   static ThemeData get lightTheme {
-    final baseTextTheme = GoogleFonts.interTextTheme();
+    final baseTextTheme = GoogleFonts.poppinsTextTheme();
 
     return ThemeData(
       useMaterial3: true,
@@ -33,11 +33,11 @@ class AppTheme {
           statusBarColor: Colors.transparent,
           statusBarIconBrightness: Brightness.dark,
         ),
-        titleTextStyle: GoogleFonts.inter(
-          fontSize: 22,
+        titleTextStyle: GoogleFonts.poppins(
+          fontSize: 18,
           fontWeight: FontWeight.w700,
           color: AppColors.primaryText,
-          letterSpacing: -0.3,
+          letterSpacing: -0.2,
         ),
         iconTheme: const IconThemeData(
           color: AppColors.primaryText,
@@ -62,7 +62,7 @@ class AppTheme {
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(10),
           ),
-          textStyle: GoogleFonts.inter(
+          textStyle: GoogleFonts.poppins(
             fontSize: 14,
             fontWeight: FontWeight.w600,
             letterSpacing: 0.2,
@@ -78,7 +78,7 @@ class AppTheme {
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(10),
           ),
-          textStyle: GoogleFonts.inter(
+          textStyle: GoogleFonts.poppins(
             fontSize: 14,
             fontWeight: FontWeight.w600,
           ),
@@ -91,7 +91,7 @@ class AppTheme {
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(8),
           ),
-          textStyle: GoogleFonts.inter(
+          textStyle: GoogleFonts.poppins(
             fontSize: 14,
             fontWeight: FontWeight.w600,
           ),
@@ -129,7 +129,7 @@ class AppTheme {
         filled: true,
         fillColor: AppColors.cardBackground,
         contentPadding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
-        hintStyle: GoogleFonts.inter(
+        hintStyle: GoogleFonts.poppins(
           fontSize: 14,
           color: AppColors.secondaryText,
         ),
@@ -151,15 +151,15 @@ class AppTheme {
         thickness: 1,
         space: 1,
       ),
-      bottomNavigationBarTheme: const BottomNavigationBarThemeData(
+      bottomNavigationBarTheme: BottomNavigationBarThemeData(
         backgroundColor: AppColors.cardBackground,
         selectedItemColor: AppColors.primaryOrange,
         unselectedItemColor: AppColors.secondaryText,
-        selectedLabelStyle: TextStyle(
+        selectedLabelStyle: GoogleFonts.poppins(
           fontSize: 12,
           fontWeight: FontWeight.w600,
         ),
-        unselectedLabelStyle: TextStyle(
+        unselectedLabelStyle: GoogleFonts.poppins(
           fontSize: 12,
           fontWeight: FontWeight.w500,
         ),
@@ -167,44 +167,44 @@ class AppTheme {
         elevation: 8,
       ),
       textTheme: baseTextTheme.copyWith(
-        displayLarge: GoogleFonts.inter(
+        displayLarge: GoogleFonts.poppins(
           fontSize: 28,
           fontWeight: FontWeight.w700,
           color: AppColors.primaryText,
           letterSpacing: -0.5,
         ),
-        headlineMedium: GoogleFonts.inter(
+        headlineMedium: GoogleFonts.poppins(
           fontSize: 22,
           fontWeight: FontWeight.w700,
           color: AppColors.primaryText,
           letterSpacing: -0.3,
         ),
-        titleLarge: GoogleFonts.inter(
+        titleLarge: GoogleFonts.poppins(
           fontSize: 16,
           fontWeight: FontWeight.w600,
           color: AppColors.primaryText,
         ),
-        titleMedium: GoogleFonts.inter(
+        titleMedium: GoogleFonts.poppins(
           fontSize: 15,
           fontWeight: FontWeight.w600,
           color: AppColors.primaryText,
         ),
-        bodyLarge: GoogleFonts.inter(
+        bodyLarge: GoogleFonts.poppins(
           fontSize: 14,
           fontWeight: FontWeight.w400,
           color: AppColors.primaryText,
         ),
-        bodyMedium: GoogleFonts.inter(
+        bodyMedium: GoogleFonts.poppins(
           fontSize: 13,
           fontWeight: FontWeight.w400,
           color: AppColors.secondaryText,
         ),
-        labelLarge: GoogleFonts.inter(
+        labelLarge: GoogleFonts.poppins(
           fontSize: 14,
           fontWeight: FontWeight.w600,
           color: AppColors.primaryText,
         ),
-        labelMedium: GoogleFonts.inter(
+        labelMedium: GoogleFonts.poppins(
           fontSize: 12,
           fontWeight: FontWeight.w500,
           color: AppColors.secondaryText,
